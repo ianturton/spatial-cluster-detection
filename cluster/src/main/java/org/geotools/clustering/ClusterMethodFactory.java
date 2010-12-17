@@ -130,6 +130,7 @@ public class ClusterMethodFactory extends AbstractFeatureCollectionProcessFactor
 
     protected Process create(Map<String, Object> parameters) throws IllegalArgumentException {
         // TODO Auto-generated method stub
+        
         String method = (String) parameters.get("type");
         if (method.equalsIgnoreCase("gam")) {
             return new GamProcess(this);
