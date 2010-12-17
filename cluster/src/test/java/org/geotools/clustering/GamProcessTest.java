@@ -17,7 +17,21 @@
 
 package org.geotools.clustering;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import junit.framework.TestCase;
+
+import org.geotools.data.FeatureSource;
+import org.geotools.data.FileDataStore;
+import org.geotools.data.FileDataStoreFinder;
+import org.geotools.feature.FeatureCollection;
+import org.geotools.process.Process;
+import org.geotools.test.TestData;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.feature.type.AttributeDescriptor;
 
 /**
  * @author ijt1
@@ -27,8 +41,23 @@ public class GamProcessTest extends TestCase {
     
         
         public void testGamProcess() throws Exception {
-            
-            // do some more assets to validate the result of your process
+            File f = TestData.file(this,"all_data.shp");
+            FileDataStore store = FileDataStoreFinder.getDataStore(f);
+            FeatureSource featureSource = store.getFeatureSource();
+            Map<String, Object> params = new HashMap<String, Object>();
+            final FeatureCollection features = featureSource.getFeatures();
+            params.put(ClusterMethodFactory.NAME.key, "gam");
+            params.put(ClusterMethodFactory.POPULATION.key, features);
+            params.put(ClusterMethodFactory.POPATTRIBUTE.key, "pop");
+            params.put(ClusterMethodFactory.CANCER.key, features);
+            params.put(ClusterMethodFactory.CANATTRIBUTE.key, "cases");
+            params.put(ClusterMethodFactory.MINRAD.key, 5000.0);
+            params.put(ClusterMethodFactory.MAXRAD.key, 10000.0);
+            params.put(ClusterMethodFactory.STEP.key, 1000.0);
+            ClusterMethodFactory factory = new ClusterMethodFactory();
+            Process process = factory.create(params);
+            assertNotNull(process);
+            process.execute(params, null);
         }
 
 
