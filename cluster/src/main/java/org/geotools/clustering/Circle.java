@@ -20,6 +20,7 @@ package org.geotools.clustering;
 import com.vividsolutions.jts.geom.Point;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
@@ -29,7 +30,8 @@ public class Circle {
     Point centre;
 
     double radius;
-
+    double statistic = 0.0;
+    
     static final private GeometricShapeFactory fac = new GeometricShapeFactory();
 
     static final private GeometryFactory gf = new GeometryFactory();
@@ -73,6 +75,14 @@ public class Circle {
         return centre.distance(p) <= radius;
     }
 
+    public double getStatistic() {
+        return statistic;
+    }
+
+    public void setStatistic(double statistic) {
+        this.statistic = statistic;
+    }
+
     @Override
     public String toString() {
         // TODO Auto-generated method stub
@@ -89,5 +99,13 @@ public class Circle {
         fac.setCentre(centre.getCoordinate());
         Polygon circle = fac.createCircle();
         return circle;
+    }
+
+    /**
+     * @return
+     */
+    public Envelope getBounds() {
+        // TODO Auto-generated method stub
+        return new Envelope(centre.getX()-radius, centre.getX()+radius, centre.getY()-radius, centre.getY()+radius);
     }
 }
