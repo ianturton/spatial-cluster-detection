@@ -18,20 +18,20 @@
 package org.geotools.clustering;
 
 import java.io.File;
+import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.FileDataStore;
 import org.geotools.data.FileDataStoreFinder;
+import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.test.TestData;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.feature.type.AttributeDescriptor;
 
 /**
  * @author ijt1
@@ -42,7 +42,11 @@ public class GamProcessTest extends TestCase {
         
         public void testGamProcess() throws Exception {
             File f = TestData.file(this,"all_data.shp");
-            FileDataStore store = FileDataStoreFinder.getDataStore(f);
+            System.out.println(f+" "+f.exists());
+            URL url = DataUtilities.fileToURL(f);
+
+            ShapefileDataStore store = new ShapefileDataStore(url);
+            assertNotNull(store); 
             FeatureSource featureSource = store.getFeatureSource();
             Map<String, Object> params = new HashMap<String, Object>();
             final FeatureCollection features = featureSource.getFeatures();
@@ -54,10 +58,11 @@ public class GamProcessTest extends TestCase {
             params.put(ClusterMethodFactory.MINRAD.key, 5000.0);
             params.put(ClusterMethodFactory.MAXRAD.key, 10000.0);
             params.put(ClusterMethodFactory.STEP.key, 1000.0);
+            params.put(ClusterMethodFactory.TESTNAME.key, "poisson");
             ClusterMethodFactory factory = new ClusterMethodFactory();
             Process process = factory.create(params);
             assertNotNull(process);
-            process.execute(params, null);
+            process.execute(params, new ClusterMonitor());
         }
 
 
