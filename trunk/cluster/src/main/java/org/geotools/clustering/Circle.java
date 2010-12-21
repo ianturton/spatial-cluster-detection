@@ -52,6 +52,17 @@ public class Circle {
         this.radius = r;
     }
 
+    /**
+     * @param i
+     * @param j
+     * @param d
+     * @param e
+     */
+    public Circle(double x, double y, double r, double s) {
+        this(x,y,r);
+        setStatistic(s);
+    }
+
     public Point getCentre() {
         return centre;
     }

@@ -71,6 +71,9 @@ public class ClusterMethodFactory extends AbstractFeatureCollectionProcessFactor
     static final Parameter<Double> MAXRAD = new Parameter<Double>("MaxRAD", Double.class,
             Text.text("Maximum Radius"), Text.text("Radius of the largest circle"), true,
             1, 1, 5.0, null);
+    static final Parameter<Double> OVERLAP = new Parameter<Double>("overlap", Double.class,
+            Text.text("Circle Overlap"), Text.text("% of radius to overlap circles"), true,
+            1, 1, 0.5, null);
     static final Parameter<Double> STEP = new Parameter<Double>("step", Double.class,
             Text.text("Radius Step"), Text.text("Step Size of radius"), true,
             1, 1, 5.0, null);

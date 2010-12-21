@@ -18,29 +18,53 @@
 package org.geotools.clustering;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
+import java.awt.image.WritableRaster;
+import java.util.ArrayList;
 
+import javax.media.jai.RasterFactory;
+
+import jj2000.j2k.entropy.encoder.EBCOTRateAllocator;
+
+import org.geotools.coverage.CoverageFactoryFinder;
+import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridCoverageFactory;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+
+import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * @author ijt1
  * 
  */
 public class QuantizeCircle {
-    
-    BufferedImage data;
+
+    private Envelope env;
+
     /**
      * produce a kernel density surface at x,y with radius r and height value after Epanechnikov
      * (1969) and Brunsdon (1990)
      * 
      * K(u) = 3/4(1-u^2)1_{|u|<=1}
      */
-    
+
     /**
-     * @param img 
+     * @param scale
+     * @param
      * 
      */
-    public QuantizeCircle(BufferedImage img) {
-        this.data = img;
+    public QuantizeCircle(Envelope env, double cellSize) {
+        this.env = env;
+        cellsize = cellSize;
+        System.out.println("quantizing an envelope of " + env + " with a cell size of " + cellsize);
+        height = (int) Math.ceil((env.getHeight() / cellsize));
+        width = (int) Math.ceil((env.getWidth() / cellsize));
+        System.out.println("map width " + env.getWidth() + " height " + env.getHeight());
+        System.out.println("this gives a width of " + width + " and height of " + height);
+        data = new double[height][width];
     }
+
     double lastRadius = -1;
 
     int m;
@@ -53,9 +77,15 @@ public class QuantizeCircle {
 
     double yadr[];
 
-    private double cellsize=1.0;
+    private double cellsize = 1.0;
 
     private boolean quantizeOn = true;
+
+    private double[][] data;
+
+    private int width;
+
+    private int height;
 
     public double getCellsize() {
         return cellsize;
@@ -73,12 +103,33 @@ public class QuantizeCircle {
         this.quantizeOn = quantizeOn;
     }
 
+    public GridCoverage2D processCircles(ArrayList<Circle> results) {
+        for (Circle c : results) {
+            quantize(c);
+        }
+        WritableRaster raster = RasterFactory.createBandedRaster(DataBuffer.TYPE_DOUBLE, width,
+                height, 1, null);
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                raster.setSample(x, y, 0, data[y][x]);
+            }
+        }
+
+        GridCoverageFactory gcf = CoverageFactoryFinder.getGridCoverageFactory(null);
+
+        CharSequence name = "Process Results";
+        GridCoverage2D grid = gcf.create(name, raster, (org.opengis.geometry.Envelope) env);
+
+        return grid;
+    }
+
     protected final void quantize(Circle c) {
         double radius = c.getRadius();
         double x = c.getCentre().getX();
         double y = c.getCentre().getY();
         double value = c.getStatistic();
-        
+
         if (radius < (cellsize)) {
             addToCell(x, y, value);
             return;
@@ -130,15 +181,21 @@ public class QuantizeCircle {
         }
 
     }
-   
+
     /**
      * @param x
      * @param y
      * @param value
      */
     private void addToCell(double x, double y, double value) {
-       System.out.println(data.getWidth()+" "+data.getHeight());
-       System.out.println(x+","+y+" "+((int)(x/cellsize))+" "+((int)(y/cellsize)));
-        data.setRGB((int)(x/cellsize), (int)(y/cellsize), (int)(value/255));
+        int ix = (int) Math.floor(((x - env.getMinX()) / cellsize));
+        int iy = (int) Math.floor(((y - env.getMinY()) / cellsize));
+        if (ix < 0 || ix >= data[0].length) {
+            System.out.println("converting " + x + " gave " + ix);
+        } else if (iy < 0 || iy >= data.length) {
+            System.out.println("converting " + y + " gave " + iy);
+        } else {
+            data[iy][ix] += value;
+        }
     }
 }

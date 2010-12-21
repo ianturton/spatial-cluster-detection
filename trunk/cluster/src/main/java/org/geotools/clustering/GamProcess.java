@@ -17,7 +17,6 @@
 
 package org.geotools.clustering;
 
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,36 +24,23 @@ import java.util.Map;
 import org.geotools.clustering.significance.PoissonTest;
 import org.geotools.clustering.significance.SignificanceTest;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.grid.GridCoverageBuilder;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.filter.LiteralExpression;
 import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.filter.text.ecql.ECQL;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
-import org.geotools.process.feature.AbstractFeatureCollectionProcessFactory;
 import org.geotools.process.impl.AbstractProcess;
-import org.geotools.process.raster.VectorToRasterException;
-import org.geotools.process.raster.VectorToRasterFactory;
 import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
 import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.type.Name;
 import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Expression;
-import org.opengis.filter.expression.Literal;
 import org.opengis.filter.expression.PropertyName;
 import org.opengis.util.ProgressListener;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 
 /**
  * @author ijt1
@@ -62,10 +48,6 @@ import com.vividsolutions.jts.geom.Point;
  */
 public class GamProcess extends AbstractProcess {
     boolean started = false;
-
-    static final private GeometryFactory gf = new GeometryFactory();
-
-    
 
     private FilterFactory2 ff;
 
@@ -93,7 +75,7 @@ public class GamProcess extends AbstractProcess {
         if (started)
             throw new IllegalStateException("Process can only be run once");
         started = true;
-        ArrayList<Circle> results = new ArrayList<Circle>(); 
+        ArrayList<Circle> results = new ArrayList<Circle>();
         if (monitor == null)
             monitor = new NullProgressListener();
 
@@ -123,7 +105,7 @@ public class GamProcess extends AbstractProcess {
             double minRadius = ((Double) input.get(ClusterMethodFactory.MINRAD.key)).doubleValue();
             double maxRadius = ((Double) input.get(ClusterMethodFactory.MAXRAD.key)).doubleValue();
             double radiusStep = ((Double) input.get(ClusterMethodFactory.STEP.key)).doubleValue();
-
+            double overlap = ((Double) input.get(ClusterMethodFactory.OVERLAP.key)).doubleValue();
             String testName = input.get(ClusterMethodFactory.TESTNAME.key).toString();
             // switch the statistic name (when we have more tests)
             SignificanceTest test = new PoissonTest(input);
@@ -158,6 +140,17 @@ public class GamProcess extends AbstractProcess {
             double minY = bounds.getMinY() - halfMaxRadius;
             double maxX = bounds.getMaxX() + halfMaxRadius;
             double maxY = bounds.getMaxY() + halfMaxRadius;
+            int loopCount=0;
+            for (double radius = minRadius; radius <= maxRadius; radius += radiusStep) {
+                for (double x = minX; x <= maxX; x += radius*overlap) {
+                    for (double y = minY; y <= maxY; y += radius*overlap) {
+                        loopCount++;
+                    }
+                }
+            }
+            int totalLoops = loopCount;
+            System.out.println("About to do "+totalLoops+" circles");
+            loopCount=0;
             PropertyName popgeom = ff.property(pop.getSchema().getGeometryDescriptor().getName());
             PropertyName cangeom = ff.property(can.getSchema().getGeometryDescriptor().getName());
             bounds = new ReferencedEnvelope(minX, maxX, minY, maxY,
@@ -165,16 +158,21 @@ public class GamProcess extends AbstractProcess {
             for (double radius = minRadius; radius <= maxRadius; radius += radiusStep) {
                 System.out.println("radius = " + radius + "\n min/max R" + minRadius + ","
                         + maxRadius);
-                for (double x = minX; x <= maxX; x += radius) {
+                monitor.setTask(Text.text("Radius "+radius));
+                monitor.progress(10.0f+(80.0f*(loopCount/totalLoops)));
+                for (double x = minX; x <= maxX; x += radius*overlap) {
                     Filter bbox = ff.bbox("the_geom", x - radius, minY, x + radius, maxY,
                             "EPSG:27700");
+                    
                     // System.out.println("applying " + bbox);
                     SimpleFeatureCollection popsubset = pop.subCollection(bbox);
                     SimpleFeatureCollection cansubset = can.subCollection(bbox);
                     // System.out.println("got " + subset.size());
                     if (popsubset.size() > 0) {
 
-                        for (double y = minY; y <= maxY; y += radius) {
+                        for (double y = minY; y <= maxY; y += radius*overlap) {
+                            loopCount++;
+                            if(loopCount%1000==0)monitor.progress(10.0f+(80.0f*(loopCount/totalLoops)));
                             Circle circle = new Circle(x, y, radius);
                             double popCount = 0;
                             double canCount = 0;
@@ -221,13 +219,14 @@ public class GamProcess extends AbstractProcess {
                                     double stat = test.getStatistic();
                                     circle.setStatistic(stat);
                                     results.add(circle);
+                                    System.out.println(circle + " " + stat);
                                 } else {
-                                    //System.out.println("not significant with " + popCount
-                                      //      + " with " + canCount + " cases");
+                                    // System.out.println("not significant with " + popCount
+                                    // + " with " + canCount + " cases");
                                 }
                             } else {
-                                //System.out.println("not worth testing " + popCount + " with "
-                                  //      + canCount + " cases");
+                                // System.out.println("not worth testing " + popCount + " with "
+                                // + canCount + " cases");
                             }
                         }// Y loop
                     }
@@ -239,10 +238,10 @@ public class GamProcess extends AbstractProcess {
             }
 
             // Geometry resultGeom = geom1.buffer(buffer);
-            GridCoverage2D cov = convert(results);
+
             monitor.setTask(Text.text("Encoding result"));
             monitor.progress(90.0f);
-
+            GridCoverage2D cov = convert(results);
             Map<String, Object> result = new HashMap<String, Object>();
             result.put(ClusterMethodFactory.RESULT.key, cov);
             monitor.complete(); // same as 100.0f
@@ -263,26 +262,16 @@ public class GamProcess extends AbstractProcess {
      */
     private GridCoverage2D convert(ArrayList<Circle> results) {
         ReferencedEnvelope resBounds = new ReferencedEnvelope(bounds.getCoordinateReferenceSystem());
-        for(Circle c:results) {
+        for (Circle c : results) {
             resBounds.expandToInclude(c.getBounds());
         }
         System.out.println(resBounds);
-        GridCoverageBuilder builder = new GridCoverageBuilder();
-        builder.setEnvelope(bounds);
-        builder.setCoordinateReferenceSystem(bounds.getCoordinateReferenceSystem());
-        final double scale = 1000.0;
-        final int width = (int)(resBounds.getWidth()/scale);
-        final int height = (int)(resBounds.getHeight()/scale);
-        builder.setImageSize(width, height);
-        BufferedImage img = builder.getBufferedImage();
-        QuantizeCircle qc = new QuantizeCircle(img);
-        qc.setCellsize(scale);
-        for(Circle c:results) {
-            qc.quantize(c);
-        }
-        return builder.getGridCoverage2D();
-    }
 
-    
+        final double scale = 100.0;
+
+        QuantizeCircle qc = new QuantizeCircle(resBounds, scale);
+
+        return qc.processCircles(results);
+    }
 
 }
