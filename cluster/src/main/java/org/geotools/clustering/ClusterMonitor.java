@@ -83,6 +83,7 @@ public class ClusterMonitor implements ProgressListener {
     public void progress(float percent) {
         // TODO Auto-generated method stub
         progress=percent;
+        System.out.println("completed "+progress+"% of task ("+task+")");
     }
 
     /* (non-Javadoc)
