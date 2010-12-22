@@ -17,22 +17,22 @@
 
 package org.geotools.clustering;
 
-import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
 
 import javax.media.jai.RasterFactory;
 
-import jj2000.j2k.entropy.encoder.EBCOTRateAllocator;
-
 import org.geotools.coverage.CoverageFactoryFinder;
+import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
+import org.geotools.coverage.grid.GridEnvelope2D;
+import org.geotools.coverage.grid.GridGeometry2D;
+import org.geotools.coverage.grid.InvalidGridGeometryException;
+import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Envelope;
+import org.opengis.referencing.operation.TransformException;
 
 /**
  * @author ijt1
@@ -40,7 +40,9 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 public class QuantizeCircle {
 
-    private Envelope env;
+    private ReferencedEnvelope env;
+
+    private GridGeometry2D gg;
 
     /**
      * produce a kernel density surface at x,y with radius r and height value after Epanechnikov
@@ -54,7 +56,7 @@ public class QuantizeCircle {
      * @param
      * 
      */
-    public QuantizeCircle(Envelope env, double cellSize) {
+    public QuantizeCircle(ReferencedEnvelope env, double cellSize) {
         this.env = env;
         cellsize = cellSize;
         System.out.println("quantizing an envelope of " + env + " with a cell size of " + cellsize);
@@ -63,6 +65,9 @@ public class QuantizeCircle {
         System.out.println("map width " + env.getWidth() + " height " + env.getHeight());
         System.out.println("this gives a width of " + width + " and height of " + height);
         data = new double[height][width];
+        GridEnvelope2D gridEnv = new GridEnvelope2D(0, 0, width, height);
+        
+        gg = new GridGeometry2D(gridEnv, (org.opengis.geometry.Envelope) env);
     }
 
     double lastRadius = -1;
@@ -117,10 +122,11 @@ public class QuantizeCircle {
         }
 
         GridCoverageFactory gcf = CoverageFactoryFinder.getGridCoverageFactory(null);
-
+       
         CharSequence name = "Process Results";
-        GridCoverage2D grid = gcf.create(name, raster, (org.opengis.geometry.Envelope) env);
-
+        
+        GridCoverage2D grid = gcf.create(name, raster, env);
+        
         return grid;
     }
 
@@ -188,8 +194,21 @@ public class QuantizeCircle {
      * @param value
      */
     private void addToCell(double x, double y, double value) {
+        GridCoordinates2D gridCoords;
         int ix = (int) Math.floor(((x - env.getMinX()) / cellsize));
         int iy = (int) Math.floor(((y - env.getMinY()) / cellsize));
+        DirectPosition2D pos = new DirectPosition2D(x, y);
+        try {
+            gridCoords = gg.worldToGrid(pos);
+        } catch (InvalidGridGeometryException e) {
+            System.out.println(e);
+            return;
+        } catch (TransformException e) {
+            System.out.println(e);
+            return;
+        }
+        ix = gridCoords.x;
+        iy = gridCoords.y;
         if (ix < 0 || ix >= data[0].length) {
             System.out.println("converting " + x + " gave " + ix);
         } else if (iy < 0 || iy >= data.length) {
