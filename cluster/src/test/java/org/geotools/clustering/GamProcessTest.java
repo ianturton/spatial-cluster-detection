@@ -27,7 +27,9 @@ import junit.framework.TestCase;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureSource;
+import org.geotools.data.memory.MemoryDataStore;
 import org.geotools.data.shapefile.ShapefileDataStore;
+import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.process.Process;
@@ -46,8 +48,12 @@ public class GamProcessTest extends TestCase {
         ShapefileDataStore store = new ShapefileDataStore(url);
         assertNotNull(store);
         FeatureSource featureSource = store.getFeatureSource();
-        Map<String, Object> params = new HashMap<String, Object>();
         final FeatureCollection features = featureSource.getFeatures();
+        MemoryDataStore memstore = new MemoryDataStore(features);
+        
+        final FeatureCollection mFeatures = memstore.getFeatureSource(store.getNames().get(0)).getFeatures();
+        Map<String, Object> params = new HashMap<String, Object>();
+        
         params.put(ClusterMethodFactory.NAME.key, "gam");
         params.put(ClusterMethodFactory.POPULATION.key, features);
         params.put(ClusterMethodFactory.POPATTRIBUTE.key, "pop");
