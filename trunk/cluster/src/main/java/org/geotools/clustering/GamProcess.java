@@ -81,7 +81,7 @@ public class GamProcess extends AbstractProcess {
 
         try {
             monitor.started();
-            monitor.setTask(Text.text("Grabbing arguments"));
+            monitor.setTask(Text.text("Grabbing arguments")); 
             monitor.progress(5.0f);
             SimpleFeatureCollection pop = (SimpleFeatureCollection) input
                     .get(ClusterMethodFactory.POPULATION.key);
@@ -159,7 +159,8 @@ public class GamProcess extends AbstractProcess {
                 System.out.println("radius = " + radius + "\n min/max R" + minRadius + ","
                         + maxRadius);
                 monitor.setTask(Text.text("Radius "+radius));
-                monitor.progress(10.0f+(80.0f*(loopCount/totalLoops)));
+                float i = (float)loopCount/(float)totalLoops;
+                monitor.progress(10.0f+(80.0f*i));
                 for (double x = minX; x <= maxX; x += radius*overlap) {
                     Filter bbox = ff.bbox("the_geom", x - radius, minY, x + radius, maxY,
                             "EPSG:27700");
@@ -172,7 +173,8 @@ public class GamProcess extends AbstractProcess {
 
                         for (double y = minY; y <= maxY; y += radius*overlap) {
                             loopCount++;
-                            if(loopCount%1000==0)monitor.progress(10.0f+(80.0f*(loopCount/totalLoops)));
+                            i = (float)loopCount/(float)totalLoops;
+                            if(loopCount%1000==0)monitor.progress(10.0f+(80.0f*i));
                             Circle circle = new Circle(x, y, radius);
                             double popCount = 0;
                             double canCount = 0;
@@ -219,7 +221,7 @@ public class GamProcess extends AbstractProcess {
                                     double stat = test.getStatistic();
                                     circle.setStatistic(stat);
                                     results.add(circle);
-                                    System.out.println(circle + " " + stat);
+                                    //System.out.println(circle + " " + stat);
                                 } else {
                                     // System.out.println("not significant with " + popCount
                                     // + " with " + canCount + " cases");
