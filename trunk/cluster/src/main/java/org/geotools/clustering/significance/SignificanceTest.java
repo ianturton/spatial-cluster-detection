@@ -28,7 +28,7 @@ import org.geotools.text.Text;
  * 
  */
 public abstract class SignificanceTest {
-   
+    static String name;
 
     static final Parameter<Boolean> EXCESS = new Parameter<Boolean>("excess", Boolean.class,
             Text.text("Test Excess"),
@@ -110,5 +110,9 @@ public abstract class SignificanceTest {
         } else {
             return ((sumP >= sumC) && (sumP >= minPopSize) && (sumC >= minCanSize));
         }
+    }
+    
+    public static String getName() {
+        return name;
     }
 }

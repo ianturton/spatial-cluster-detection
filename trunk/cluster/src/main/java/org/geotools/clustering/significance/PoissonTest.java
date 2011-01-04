@@ -27,11 +27,7 @@ import java.util.Set;
 public class PoissonTest extends SignificanceTest {
     public static final int MAXCAN = 300;
 
-    
-    
     private double[] cons;
-
-
 
     private double statistic;
 
@@ -40,6 +36,7 @@ public class PoissonTest extends SignificanceTest {
      */
     public PoissonTest(Map<String, Object> params) {
         super(params);
+        name = "Poisson";
         if (canProcess(params)) {
             cons = new double[MAXCAN];
 
@@ -48,11 +45,11 @@ public class PoissonTest extends SignificanceTest {
                 cons[i] = ((double) 1.0) / i;
             }
         }
-       Set<String> keys = parameters.keySet();
-       for(String key:keys) {
-           System.out.println(key+":"+parameters.get(key));
-       }
-       
+        Set<String> keys = parameters.keySet();
+        for (String key : keys) {
+            System.out.println(key + ":" + parameters.get(key));
+        }
+
     }
 
     public boolean canProcess(Map<String, Object> params) {
@@ -70,14 +67,13 @@ public class PoissonTest extends SignificanceTest {
      * @see org.geotools.clustering.significance.SignificanceTest#isSignificant(double, double)
      */
     public boolean isSignificant(double sumP, double sumC) throws PoissonException {
-        
+
         double cumPrb[];
         cumPrb = new double[MAXCAN];
         // int jA = (int) sumC;
         // double aMean = (double) sumP;
         double prob;
 
-        
         int jA = (int) sumC;
         double aMean = (double) sumP;
 
@@ -101,7 +97,7 @@ public class PoissonTest extends SignificanceTest {
         // System.out.println(prob +" "+ parameters.getSignificanceThreshold() +" "+ totcases +" "+
         // totpop);
         statistic = sumC - sumP;
-        if (prob <= ((Double)parameters.get(THRESHOLD.key)).doubleValue()) {
+        if (prob <= ((Double) parameters.get(THRESHOLD.key)).doubleValue()) {
             switch (((Integer) parameters.get(STATTYPE.key)).intValue()) {
             // case 1: stat = sumC - sumP; break;
             // case 2: stat = sumC/sumP; break;
@@ -131,4 +127,5 @@ public class PoissonTest extends SignificanceTest {
         // TODO Auto-generated method stub
         return statistic;
     }
+
 }
