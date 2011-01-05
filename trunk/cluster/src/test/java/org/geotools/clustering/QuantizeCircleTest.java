@@ -19,26 +19,18 @@ package org.geotools.clustering;
 
 import java.util.ArrayList;
 
-import jj2000.j2k.entropy.encoder.EBCOTRateAllocator;
+import junit.framework.TestCase;
 
-import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
-import org.geotools.resources.CRSUtilities;
-import org.opengis.coverage.grid.GridRange;
-import org.opengis.geometry.DirectPosition;
 import org.opengis.geometry.Envelope;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
-
-import junit.framework.TestCase;
 
 /**
  * @author ijt1
