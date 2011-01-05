@@ -91,6 +91,9 @@ public class ClusterMethodFactory extends AbstractFeatureCollectionProcessFactor
     static final Parameter<Integer> MINCAN = new Parameter<Integer>("mincan", Integer.class,
             Text.text("Minium Incidence"), Text.text("minimum number of cases to be considered"), true,
             1, 1, 1, null);
+    static final Parameter<Integer> NCIRCLES = new Parameter<Integer>("NCIRCLES", Integer.class,
+            Text.text("Number of Circles"), Text.text("Number of circles to be generated"), true,
+            1, 1, 1, null);
     static final Parameter<Double> SIGNIFICANCE = new Parameter<Double>("significance", Double.class,
             Text.text("Significance threshold"), Text.text("Threshold to consider a circle significant"), true,
             1, 1, 0.001, null);
@@ -114,6 +117,7 @@ public class ClusterMethodFactory extends AbstractFeatureCollectionProcessFactor
         parameters.put(MINRAD.key, MINRAD);
         parameters.put(MAXRAD.key, MAXRAD);
         parameters.put(STEP.key, STEP);
+        parameters.put(NCIRCLES.key, NCIRCLES);
         parameters.put(MINCAN.key, MINCAN);
         parameters.put(MINPOP.key, MINPOP);
         parameters.put(TESTNAME.key, TESTNAME);
@@ -137,7 +141,9 @@ public class ClusterMethodFactory extends AbstractFeatureCollectionProcessFactor
         String method = (String) parameters.get("type");
         if (method.equalsIgnoreCase("gam")) {
             return new GamProcess(this);
-        } else {
+        }else if(method.equalsIgnoreCase("random")){
+            return new RandomProcess(this);
+        }else {
             throw new IllegalArgumentException("Unknown method " + method);
         }
     }

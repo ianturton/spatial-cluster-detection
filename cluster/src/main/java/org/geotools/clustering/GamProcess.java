@@ -17,35 +17,24 @@
 package org.geotools.clustering;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import org.geotools.clustering.significance.SignificanceTestException;
 
 import org.geotools.clustering.significance.PoissonTest;
-import org.geotools.clustering.significance.SignificanceTest;
-import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.filter.text.ecql.ECQL;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.process.ProcessException;
-import org.geotools.process.ProcessFactory;
-import org.geotools.process.impl.AbstractProcess;
 import org.geotools.text.Text;
-import org.geotools.util.NullProgressListener;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory2;
-import org.opengis.filter.expression.Expression;
 import org.opengis.filter.expression.PropertyName;
 import org.opengis.geometry.BoundingBox;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.util.ProgressListener;
 
 /**
  * @author ijt1
@@ -53,7 +42,7 @@ import org.opengis.util.ProgressListener;
  */
 public class GamProcess extends AbstractClusterProcess {
 
-    private FilterFactory2 ff;
+   
     
     private boolean sharedData = false;
     private double minRadius;
@@ -64,7 +53,7 @@ public class GamProcess extends AbstractClusterProcess {
 
     public GamProcess(ClusterMethodFactory factory) {
         super(factory);
-        ff = CommonFactoryFinder.getFilterFactory2(null);
+        
 
     }
 
