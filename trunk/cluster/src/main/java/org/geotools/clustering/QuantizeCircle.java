@@ -20,6 +20,7 @@ package org.geotools.clustering;
 import java.awt.image.DataBuffer;
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.media.jai.RasterFactory;
 
@@ -108,7 +109,7 @@ public class QuantizeCircle {
         this.quantizeOn = quantizeOn;
     }
 
-    public GridCoverage2D processCircles(ArrayList<Circle> results) {
+    public GridCoverage2D processCircles(List<Circle> results) {
         for (Circle c : results) {
             quantize(c);
         }
