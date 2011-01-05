@@ -117,7 +117,11 @@ public class QuantizeCircle {
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
+                if(data[y][x]>0.0) {
                 raster.setSample(x, y, 0, data[y][x]);
+                }else {
+                    raster.setSample(x, y, 0, Double.NaN); // apparently the default NODATA value
+                }
             }
         }
 
