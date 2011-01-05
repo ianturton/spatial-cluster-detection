@@ -22,8 +22,10 @@ import java.util.ArrayList;
 import junit.framework.TestCase;
 
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
+import org.opengis.geometry.DirectPosition;
 import org.opengis.geometry.Envelope;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
@@ -33,7 +35,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 
 /**
- * @author ijt1
+ * @author ijt1 
  *
  */
 public class QuantizeCircleTest extends TestCase {
@@ -108,6 +110,7 @@ public class QuantizeCircleTest extends TestCase {
       
         /*
          * uncomment to see a cross section of the circle.
+         */
         double[] res = new double[1];
         double minX = envelope.getMinimum(0);
         double maxX = envelope.getMaximum(0);
@@ -116,11 +119,13 @@ public class QuantizeCircleTest extends TestCase {
         double width= maxX-minX;
         double step = width/scale;
         for (int i=0;i<(Math.floor(width/scale)-1);i++) {
+            if(minX+(i*step)>=maxX) continue;
             dp.setLocation(minX+(i*step), centerY);
+
             grid.evaluate((DirectPosition)dp, res );
             System.out.println(dp.x+" "+res[0]);
         }
-       */
+       /**/
         
     }
 
