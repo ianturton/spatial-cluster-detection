@@ -59,7 +59,7 @@ public abstract class SignificanceTest {
         this.parameters = params;
     }
 
-    public abstract boolean isSignificant(double obsP, double obsC) throws PoissonException;
+    public abstract boolean isSignificant(double obsP, double obsC) throws SignificanceTestException;
 
     public abstract double getStatistic();
 
