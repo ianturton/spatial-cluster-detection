@@ -66,7 +66,7 @@ public class PoissonTest extends SignificanceTest {
      * 
      * @see org.geotools.clustering.significance.SignificanceTest#isSignificant(double, double)
      */
-    public boolean isSignificant(double sumP, double sumC) throws PoissonException {
+    public boolean isSignificant(double sumP, double sumC) throws SignificanceTestException {
 
         double cumPrb[];
         cumPrb = new double[MAXCAN];
@@ -82,7 +82,7 @@ public class PoissonTest extends SignificanceTest {
         }
 
         if (jA > MAXCAN) {
-            throw new PoissonException("Too many cases for a Poisson Test");
+            throw new SignificanceTestException("Too many cases for a Poisson Test");
         }
         if (jA > 1) {
             cumPrb[0] = Math.exp(-aMean);

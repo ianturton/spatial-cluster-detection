@@ -21,14 +21,14 @@ package org.geotools.clustering.significance;
  * @author ijt1
  *
  */
-public class PoissonException extends Exception {
+public class SignificanceTestException extends Exception {
     
     private static final long serialVersionUID = 1L;
 
-    public PoissonException(Throwable throwable){
+    public SignificanceTestException(Throwable throwable){
         super(throwable);
     }
-    public PoissonException(String message) {
+    public SignificanceTestException(String message) {
         super(message);
     }
 }
