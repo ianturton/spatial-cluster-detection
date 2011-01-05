@@ -29,11 +29,11 @@ import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.memory.MemoryDataStore;
 import org.geotools.data.shapefile.ShapefileDataStore;
-import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.process.Process;
 import org.geotools.test.TestData;
+
 /**
  * @author ijt1
  * 
@@ -42,7 +42,7 @@ public class GamProcessTest extends TestCase {
 
     public void testGamProcess() throws Exception {
         File f = TestData.file(this, "all_data.shp");
-        System.out.println(f + " " + f.exists());
+        //System.out.println(f + " " + f.exists());
         URL url = DataUtilities.fileToURL(f);
 
         ShapefileDataStore store = new ShapefileDataStore(url);
@@ -50,10 +50,11 @@ public class GamProcessTest extends TestCase {
         FeatureSource featureSource = store.getFeatureSource();
         final FeatureCollection features = featureSource.getFeatures();
         MemoryDataStore memstore = new MemoryDataStore(features);
-        
-        final FeatureCollection mFeatures = memstore.getFeatureSource(store.getNames().get(0)).getFeatures();
+      
+        final FeatureCollection mFeatures = memstore.getFeatureSource(store.getNames().get(0))
+                .getFeatures();
         Map<String, Object> params = new HashMap<String, Object>();
-        
+
         params.put(ClusterMethodFactory.NAME.key, "gam");
         params.put(ClusterMethodFactory.POPULATION.key, features);
         params.put(ClusterMethodFactory.POPATTRIBUTE.key, "pop");
@@ -67,14 +68,17 @@ public class GamProcessTest extends TestCase {
         ClusterMethodFactory factory = new ClusterMethodFactory();
         Process process = factory.create(params);
         assertNotNull(process);
+        long start = System.currentTimeMillis();
         Map<String, Object> results = process.execute(params, new ClusterMonitor());
+        long end = System.currentTimeMillis();
+        System.out.println("process took "+((end-start)/1000)+ " seconds");
         GridCoverage2D grid = (GridCoverage2D) results.get(ClusterMethodFactory.RESULT.key);
         String basename = f.toString();
-        basename = basename.substring(0,basename.length()-3 )+".tiff";
+        basename = basename.substring(0, basename.length() - 3) + ".tiff";
         File out = new File(basename);
         GeoTiffWriter gtw = new GeoTiffWriter(out);
         gtw.write(grid, null);
-        
+
     }
 
 }
