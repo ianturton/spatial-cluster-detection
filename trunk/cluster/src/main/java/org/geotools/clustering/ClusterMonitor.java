@@ -133,6 +133,8 @@ public class ClusterMonitor implements ProgressListener {
         // TODO Auto-generated method stub
         exception.printStackTrace();
         System.out.println(exception.getLocalizedMessage());
+        System.out.println("Help it's all gone wrong! - I'm quiting!");
+        System.exit(1);
     }
 
 }
