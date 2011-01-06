@@ -14,7 +14,6 @@
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *    Lesser General Public License for more details.
  */
-
 package org.geotools.clustering;
 
 import java.awt.image.DataBuffer;
@@ -23,10 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.media.jai.RasterFactory;
+import org.geotools.coverage.Category;
 
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridCoverageBuilder;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
@@ -41,57 +42,44 @@ import org.opengis.referencing.operation.TransformException;
  */
 public class QuantizeCircle {
 
+    double lastRadius = -1;
+    int m;
+    int numb;
+    double xker[];
+    double xadr[];
+    double yadr[];
+    private double cellsize = 1.0;
+    private boolean quantizeOn = true;
+    private double[][] data;
+    private int width;
+    private int height;
     private ReferencedEnvelope env;
-
     private GridGeometry2D gg;
 
     /**
+     *
      * produce a kernel density surface at x,y with radius r and height value after Epanechnikov
      * (1969) and Brunsdon (1990)
      * 
      * K(u) = 3/4(1-u^2)1_{|u|<=1}
+     *
+     * @param env - the bounds of the surface
+     * @param cellSize - what size to make the pixels
      */
-
-    /**
-     * @param scale
-     * @param
-     * 
-     */
+    
     public QuantizeCircle(ReferencedEnvelope env, double cellSize) {
         this.env = env;
         cellsize = cellSize;
-        System.out.println("quantizing an envelope of " + env + " with a cell size of " + cellsize);
+        //System.out.println("quantizing an envelope of " + env + " with a cell size of " + cellsize);
         height = (int) Math.ceil((env.getHeight() / cellsize));
         width = (int) Math.ceil((env.getWidth() / cellsize));
-        System.out.println("map width " + env.getWidth() + " height " + env.getHeight());
-        System.out.println("this gives a width of " + width + " and height of " + height);
+        //System.out.println("map width " + env.getWidth() + " height " + env.getHeight());
+        //System.out.println("this gives a width of " + width + " and height of " + height);
         data = new double[height][width];
         GridEnvelope2D gridEnv = new GridEnvelope2D(0, 0, width, height);
-        
+
         gg = new GridGeometry2D(gridEnv, (org.opengis.geometry.Envelope) env);
     }
-
-    double lastRadius = -1;
-
-    int m;
-
-    int numb;
-
-    double xker[];
-
-    double xadr[];
-
-    double yadr[];
-
-    private double cellsize = 1.0;
-
-    private boolean quantizeOn = true;
-
-    private double[][] data;
-
-    private int width;
-
-    private int height;
 
     public double getCellsize() {
         return cellsize;
@@ -101,6 +89,10 @@ public class QuantizeCircle {
         this.cellsize = cellsize;
     }
 
+    /**
+     * will circles be multiplied by the kernel
+     * @return
+     */
     public boolean isQuantizeOn() {
         return quantizeOn;
     }
@@ -118,20 +110,22 @@ public class QuantizeCircle {
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                if(data[y][x]>0.0) {
+//                if (data[y][x] > 0.0) {
+//                    raster.setSample(x, y, 0, data[y][x]);
+//                } else {
+//                    raster.setSample(x, y, 0, -9999.0 ); // apparently the default NODATA value
+//                }
+
                 raster.setSample(x, y, 0, data[y][x]);
-                }else {
-                    raster.setSample(x, y, 0, Double.NaN); // apparently the default NODATA value
-                }
-            }
+                            }
         }
 
         GridCoverageFactory gcf = CoverageFactoryFinder.getGridCoverageFactory(null);
-       
+
         CharSequence name = "Process Results";
-        
+
         GridCoverage2D grid = gcf.create(name, raster, env);
-        
+
         return grid;
     }
 
@@ -185,10 +179,11 @@ public class QuantizeCircle {
         }
         // now apply it to the cells
         for (int j = 0; j < m; j++) {
-            if (quantizeOn)
+            if (quantizeOn) {
                 addToCell(x + xadr[j], y + yadr[j], (value * xker[j]));
-            else
+            } else {
                 addToCell(x + xadr[j], y + yadr[j], value);
+            }
         }
 
     }
