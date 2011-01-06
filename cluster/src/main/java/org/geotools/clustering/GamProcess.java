@@ -122,8 +122,9 @@ public class GamProcess extends AbstractClusterProcess {
         PropertyName cangeom = ff.property(can.getSchema().getGeometryDescriptor().getName());
         SimpleFeatureIterator popIt;
         SimpleFeatureIterator canIt;
+        loopCount = 0;
         for (double radius = minRadius; radius <= maxRadius; radius += radiusStep) {
-            loopCount = 0;
+            
             System.out.println("radius = " + radius + "\n min/max R" + minRadius + "," + maxRadius);
             monitor.setTask(Text.text("Radius " + radius));
             float i = (float) loopCount / (float) totalCircles;
