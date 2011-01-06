@@ -100,6 +100,8 @@ public class ClusterMethodFactory extends AbstractFeatureCollectionProcessFactor
     
     public static final Parameter<GridCoverage2D> RESULT = new Parameter<GridCoverage2D>("result",
             GridCoverage2D.class, Text.text("Results Coverage"), Text.text("The results surface"));
+    public static final Parameter<FeatureCollection> CIRCLES = new Parameter<FeatureCollection>("circles",
+            FeatureCollection.class, Text.text("Significant Circles"), Text.text("The Significant Circles"));
     /*
      * (non-Javadoc)
      * 
@@ -133,6 +135,7 @@ public class ClusterMethodFactory extends AbstractFeatureCollectionProcessFactor
 
     static {
         resultInfo.put(RESULT.key, RESULT);
+        resultInfo.put(CIRCLES.key, CIRCLES);
     }
 
     protected Process create(Map<String, Object> parameters) throws IllegalArgumentException {
