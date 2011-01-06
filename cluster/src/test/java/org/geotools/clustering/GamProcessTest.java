@@ -91,7 +91,7 @@ public class GamProcessTest extends TestCase {
 
 
         DataStoreFactorySpi dataStoreFactory = new ShapefileDataStoreFactory();
-        File newFile = new File(basename+"_rand.shp");
+        File newFile = new File(basename+"_gam.shp");
         Map<String, Serializable> params2 = new HashMap<String, Serializable>();
         params2.put("url", newFile.toURI().toURL());
         params2.put("create spatial index", Boolean.TRUE);
