@@ -18,6 +18,7 @@
 package org.geotools.clustering;
 
 import java.io.File;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,14 +26,23 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffConstants;
+import org.geotools.data.DataStoreFactorySpi;
 import org.geotools.data.DataUtilities;
+import org.geotools.data.DefaultTransaction;
 import org.geotools.data.FeatureSource;
+import org.geotools.data.FeatureStore;
+import org.geotools.data.Transaction;
 import org.geotools.data.memory.MemoryDataStore;
 import org.geotools.data.shapefile.ShapefileDataStore;
+import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.process.Process;
 import org.geotools.test.TestData;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.parameter.GeneralParameterValue;
+import org.opengis.parameter.ParameterValueGroup;
 
 /**
  * @author ijt1
@@ -51,8 +61,7 @@ public class RandomProcessTest extends TestCase {
         final FeatureCollection features = featureSource.getFeatures();
         MemoryDataStore memstore = new MemoryDataStore(features);
       
-        final FeatureCollection mFeatures = memstore.getFeatureSource(store.getNames().get(0))
-                .getFeatures();
+       
         Map<String, Object> params = new HashMap<String, Object>();
 
         params.put(ClusterMethodFactory.NAME.key, "random");
@@ -73,10 +82,46 @@ public class RandomProcessTest extends TestCase {
         System.out.println("process took "+((end-start)/1000)+ " seconds");
         GridCoverage2D grid = (GridCoverage2D) results.get(ClusterMethodFactory.RESULT.key);
         String basename = f.toString();
-        basename = basename.substring(0, basename.length() - 3) + "_rand.tiff";
-        File out = new File(basename);
+        basename=basename.substring(0, basename.length() - 4);
+        String filename = basename + "_rand.tiff";
+        File out = new File(filename);
         GeoTiffWriter gtw = new GeoTiffWriter(out);
         gtw.write(grid, null);
+
+        FeatureCollection outfeatures = (FeatureCollection)results.get(ClusterMethodFactory.CIRCLES.key);
+        
+        
+        DataStoreFactorySpi dataStoreFactory = new ShapefileDataStoreFactory();
+        File newFile = new File(basename+"_rand.shp");
+        Map<String, Serializable> params2 = new HashMap<String, Serializable>();
+        params2.put("url", newFile.toURI().toURL());
+        params2.put("create spatial index", Boolean.TRUE);
+
+        ShapefileDataStore newDataStore = (ShapefileDataStore) dataStoreFactory
+                .createNewDataStore(params2);
+        newDataStore.createSchema((SimpleFeatureType) outfeatures.getSchema());
+        Transaction transaction = new DefaultTransaction("create");
+
+        String typeName = newDataStore.getTypeNames()[0];
+        FeatureSource outfeatureSource = newDataStore.getFeatureSource(typeName);
+
+        if (outfeatureSource instanceof FeatureStore) {
+            FeatureStore featureStore = (FeatureStore) outfeatureSource;
+
+            featureStore.setTransaction(transaction);
+            try {
+                featureStore.addFeatures(outfeatures);
+                transaction.commit();
+
+            } catch (Exception problem) {
+                problem.printStackTrace();
+                transaction.rollback();
+
+            } finally {
+                transaction.close();
+            }
+        }
+        
 
     }
 
