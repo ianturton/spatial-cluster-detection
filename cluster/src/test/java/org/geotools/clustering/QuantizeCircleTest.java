@@ -16,13 +16,18 @@
  */
 package org.geotools.clustering;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import junit.framework.TestCase;
 
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridGeometry2D;
+import org.geotools.feature.FeatureCollection;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
@@ -35,8 +40,13 @@ import org.opengis.referencing.NoSuchAuthorityCodeException;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
+import java.io.File;
+import org.geotools.clustering.utils.Utilities;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.ViewType;
+import org.geotools.gce.geotiff.GeoTiffWriter;
+import org.geotools.test.TestData;
+import org.opengis.filter.expression.Add;
 import org.opengis.referencing.operation.TransformException;
 
 /**
@@ -47,16 +57,22 @@ public class QuantizeCircleTest extends TestCase {
 
     static boolean setup = false;
     static ArrayList<Circle> results = new ArrayList<Circle>();
+    static double expectedTotal = 0;
+    static QuantizeCircle qc;
+    static ReferencedEnvelope resBounds;
 
     @Override
     protected void setUp() throws Exception {
         // TODO Auto-generated method stub
         if (!setup) {
             super.setUp();
+            setup = true;
             Circle[] test = {
-                new Circle(420000, 560000, 5000.0, 15.0)/*,
-            new Circle(427500,565000,5000.0,15.542833634382614),
-            new Circle(432500,570000,5000.0,11.402839291109292),
+                new Circle(426625.0, 562805.0, 4511.0, 15.0),
+                new Circle(434538.608998373, 574268.198719409, 3494.94915845955, 7.5)/*,
+            new Circle(426624.88935463, 562804.920944528, 4510.91327941836, 15.0)
+            new Circle(426500,565000,7000.0,15.0),
+            new Circle(432500,570000,5000.0,10)/*,
             new Circle(432500,575000,5000.0,7.536707656508128),
             new Circle(437500,575000,5000.0,7.155322144156536),
             new Circle(422500,561000,6000.0,17.47980612854911),
@@ -72,8 +88,19 @@ public class QuantizeCircleTest extends TestCase {
             new Circle(442500,575000,10000.0,10.150218233944216)*/
 
             };
+            System.out.println("testing with " + test.length + " circles");
             results.addAll(Arrays.asList(test));
+            resBounds = new ReferencedEnvelope(CRS.decode("EPSG:27700"));
 
+            for (Circle c : results) {
+                expectedTotal += c.getStatistic();
+                resBounds.expandToInclude(c.getBounds());
+            }
+
+
+            final double scale = 100.0;
+
+            qc = new QuantizeCircle(resBounds, scale);
         }
     }
 
@@ -84,59 +111,110 @@ public class QuantizeCircleTest extends TestCase {
      * @throws MismatchedDimensionException 
      */
     public void testQuantize() throws MismatchedDimensionException, NoSuchAuthorityCodeException, FactoryException, TransformException {
-        ReferencedEnvelope resBounds = new ReferencedEnvelope(CRS.decode("EPSG:27700"));
-        /*for (Circle c : results) {
-        resBounds.expandToInclude(c.getBounds());
-        }*/
-        final Circle circle = results.get(0);
-        Point ll = circle.centre;
-        Coordinate coord1 = (Coordinate) ll.getCoordinate().clone();
-        coord1.x = coord1.x + 10000;
-        coord1.y = coord1.y + 10000;
-        Coordinate coord2 = (Coordinate) ll.getCoordinate().clone();
-        coord2.x = coord2.x - 10000;
-        coord2.y = coord2.y - 10000;
-        resBounds.expandToInclude(coord1);
-        resBounds.expandToInclude(coord2);
-        System.out.println(resBounds);
 
-        final double scale = 100.0;
-
-        QuantizeCircle qc = new QuantizeCircle(resBounds, scale);
 
 
         GridCoverage2D grid = qc.processCircles(results);
+        File out;
+        try {
+            File outDir = TestData.file(this, null);
+            out = new File(outDir, "quantizeCircleOut.tiff");
+            Utilities.writeGrid(out, grid);
+            out = new File(outDir, "quantizeCircleOut.shp");
+            FeatureCollection circles = Utilities.circles2FeatureCollection(results, resBounds.getCoordinateReferenceSystem());
+            Utilities.writeCircles(out, circles);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(QuantizeCircleTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(QuantizeCircleTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
         final Envelope envelope = grid.getEnvelope();
         System.out.println(envelope);
-        double delta = 1e-4;
-        assertEquals(410000.0, envelope.getMinimum(0), delta);
-        assertEquals(550000.0, envelope.getMinimum(1), delta);
-        assertEquals(430000.0, envelope.getMaximum(0), delta);
-        assertEquals(570000.0, envelope.getMaximum(1), delta);
+        double delta = 1e-2;
 
-        
+
         double[] res = new double[1];
-        
+
         GridGeometry2D gg = grid.getGridGeometry();
         GridEnvelope r = gg.getGridRange();
         int startX = r.getLow(0);
         int endX = r.getHigh(0);
         int startY = r.getLow(1);
         int endY = r.getHigh(1);
-       
+
         DirectPosition c;
-        grid.view(ViewType.NATIVE);
+
         double total = 0.0;
         for (int i = startX; i < endX; i++) {
             for (int j = startY; j < endY; j++) {
                 c = gg.gridToWorld(new GridCoordinates2D(i, j));
                 grid.evaluate(c, res);
-                if(!Double.isNaN(res[0])&&!Double.isInfinite(res[0]))total += res[0];
-                //if(i==100)System.out.println(j + " " + res[0]);
+                if (!Double.isNaN(res[0]) && !Double.isInfinite(res[0])) {
+                    total += res[0];
+                }
+                if (i == 100) {
+                    System.out.println(j + " " + res[0]);
+                }
             }
         }
         /**/
-        System.out.println("Total under the kernel is "+total);
-        assertEquals("Wrong ammount under the kernal", 15.0, total, delta);
+        System.out.println("Total under the kernel is " + total);
+        assertEquals("Wrong ammount under the kernal", expectedTotal, total, delta);
+    }
+
+    public void testAddToCell() {
+        double cellsize = qc.getCellsize();
+        GridCoordinates2D g;
+        for (Circle c : results) {
+            double radius = c.getRadius();
+
+            double rsq = radius * radius;
+            final double w = Math.ceil((radius + cellsize / 2.0) / cellsize) * cellsize;
+            double min = -w;//-radius - cellsize / 2.0;
+            double max = w;//radius + cellsize / 2.0;
+            //System.out.println(min + " " + max);
+            int numb = (int) (Math.ceil((2.0 * (radius + cellsize))) / cellsize);
+
+            double[] xker = new double[numb * numb];
+            double[] xadr = new double[numb * numb];
+            double[] yadr = new double[numb * numb];
+            double lastX = 0;
+            double yy, xx, xxsq, dis, sum;
+            xx = min;
+            int m = 0;
+            sum = 0;
+            int lastI = 0;
+            int lastJ = 0;
+            double x = c.getCentre().getX();
+            x = Math.ceil((x + cellsize / 2.0) / cellsize) * cellsize;
+            double y = c.getCentre().getY();
+            y = Math.floor((y + cellsize / 2.0) / cellsize) * cellsize;
+            for (int i = 0; i <= numb; i++) {
+                yy = max;
+                xxsq = xx * xx;
+                for (int j = 0; j <= numb; j++) {
+                    dis = xxsq + yy * yy;
+                    if (dis <= rsq) { // 1_{|u|<=1} scaled by Radius of circle
+
+                        g = qc.addToCell(x + xx, y + yy, sum);
+                        if (g.x > lastI && Math.abs(lastI - g.x) > 1) {
+                            System.out.println("skipped col " + lastI + " to " + g.x);
+                            System.out.println("xx " + xx + " x " + x + " lastX " + lastX);
+                        }
+                        if (g.y > lastJ && Math.abs(lastJ - g.y) > 1) {
+                            System.out.println("skipped row " + lastJ + " to " + g.y);
+                        }
+                        lastI = g.x;
+                        lastJ = g.y;
+                    }
+                    yy -= cellsize;
+
+                }
+                lastX = xx;
+                xx += cellsize;
+                //lastI=0;
+            }
+        }
     }
 }
