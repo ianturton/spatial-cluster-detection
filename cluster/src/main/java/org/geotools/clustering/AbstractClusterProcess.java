@@ -4,7 +4,6 @@
  */
 package org.geotools.clustering;
 
-import com.vividsolutions.jts.geom.Polygon;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,15 +11,12 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import org.geotools.clustering.significance.SignificanceTestException;
 import org.geotools.clustering.significance.SignificanceTest;
+import org.geotools.clustering.utils.Utilities;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureCollection;
-import org.geotools.feature.FeatureCollections;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
@@ -28,7 +24,6 @@ import org.geotools.process.impl.AbstractProcess;
 import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
 import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Expression;
 import org.opengis.geometry.MismatchedDimensionException;
@@ -77,7 +72,7 @@ public abstract class AbstractClusterProcess extends AbstractProcess {
         } else {
             monitor = mon;
         }
-        SimpleFeature feature;
+        SimpleFeature feature = null;
         try {
             mon.started();
             mon.setTask(Text.text("Grabbing arguments"));
@@ -115,23 +110,9 @@ public abstract class AbstractClusterProcess extends AbstractProcess {
             mon.setTask(Text.text("Encoding result"));
             mon.progress(90.0F);
             GridCoverage2D cov = convert(results);
-            FeatureCollection circles = FeatureCollections.newCollection();
-            SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();
-            builder.setName("Location");
-            builder.setCRS(pop.getBounds().getCoordinateReferenceSystem()); // <- Coordinate reference system
 
-            // add attributes in order
-            builder.add("Circle", Polygon.class);
-            builder.add("Statisic", Double.class);
-            SimpleFeatureType TYPE = builder.buildFeatureType();
-            SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder(TYPE);
-
-            for (Circle c : results) {
-                featureBuilder.add(c.toPolygon());
-                featureBuilder.add(c.getStatistic());
-                feature = featureBuilder.buildFeature(null);
-                circles.add(feature);
-            }
+            FeatureCollection circles = Utilities.circles2FeatureCollection(
+                    results,pop.getBounds().getCoordinateReferenceSystem());
             Map<String, Object> result = new HashMap<String, Object>();
             result.put(ClusterMethodFactory.RESULT.key, cov);
             result.put(ClusterMethodFactory.CIRCLES.key, circles);
