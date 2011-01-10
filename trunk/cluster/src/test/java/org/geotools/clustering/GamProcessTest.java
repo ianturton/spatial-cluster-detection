@@ -17,13 +17,16 @@
 
 package org.geotools.clustering;
 
+
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
 import junit.framework.TestCase;
+import org.geotools.clustering.utils.Utilities;
 
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.DataStoreFactorySpi;
@@ -53,6 +56,7 @@ public class GamProcessTest extends TestCase {
         URL url = DataUtilities.fileToURL(f);
 
         ShapefileDataStore store = new ShapefileDataStore(url);
+
         assertNotNull(store);
         FeatureSource featureSource = store.getFeatureSource();
         final FeatureCollection features = featureSource.getFeatures();
@@ -83,43 +87,14 @@ public class GamProcessTest extends TestCase {
         String basename = f.toString();
         basename = basename.substring(0, basename.length() - 4);
         String covfil = basename + "_gam.tiff";
-        File out = new File(covfil);
-        GeoTiffWriter gtw = new GeoTiffWriter(out);
-        gtw.write(grid, null);
+        Utilities.writeGrid(covfil, grid); 
 
         FeatureCollection outfeatures = (FeatureCollection)results.get(ClusterMethodFactory.CIRCLES.key);
 
-
-        DataStoreFactorySpi dataStoreFactory = new ShapefileDataStoreFactory();
-        File newFile = new File(basename+"_gam.shp");
-        Map<String, Serializable> params2 = new HashMap<String, Serializable>();
-        params2.put("url", newFile.toURI().toURL());
-        params2.put("create spatial index", Boolean.TRUE);
-
-        ShapefileDataStore newDataStore = (ShapefileDataStore) dataStoreFactory
-                .createNewDataStore(params2);
-        newDataStore.createSchema((SimpleFeatureType) outfeatures.getSchema());
-        Transaction transaction = new DefaultTransaction("create");
-
-        String typeName = newDataStore.getTypeNames()[0];
-        FeatureSource outfeatureSource = newDataStore.getFeatureSource(typeName);
-
-        if (outfeatureSource instanceof FeatureStore) {
-            FeatureStore featureStore = (FeatureStore) outfeatureSource;
-
-            featureStore.setTransaction(transaction);
-            try {
-                featureStore.addFeatures(outfeatures);
-                transaction.commit();
-
-            } catch (Exception problem) {
-                problem.printStackTrace();
-                transaction.rollback();
-
-            } finally {
-                transaction.close();
-            }
-        }
+        Utilities.writeCircles(basename+"_gam.shp", outfeatures);
+        
     }
+
+    
 
 }
