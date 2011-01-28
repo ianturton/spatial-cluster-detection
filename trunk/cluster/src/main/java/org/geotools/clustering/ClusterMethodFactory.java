@@ -34,6 +34,7 @@ import org.opengis.util.InternationalString;
  * 
  */
 public class ClusterMethodFactory extends AbstractFeatureCollectionProcessFactory {
+
     final String VERSION = "1.0";
 
     public static final Parameter<FeatureCollection> POPULATION = new Parameter<FeatureCollection>(
@@ -94,6 +95,9 @@ public class ClusterMethodFactory extends AbstractFeatureCollectionProcessFactor
     static final Parameter<Integer> NCIRCLES = new Parameter<Integer>("NCIRCLES", Integer.class,
             Text.text("Number of Circles"), Text.text("Number of circles to be generated"), true,
             1, 1, 1, null);
+    static final Parameter<Integer> NONEIGHBOURS = new Parameter<Integer>("NONEIGHBOURS", Integer.class,
+            Text.text("Number of Neighbours"), Text.text("Number of neighbours to be considered"), true,
+            1, 1, 1, null); 
     static final Parameter<Double> SIGNIFICANCE = new Parameter<Double>("significance", Double.class,
             Text.text("Significance threshold"), Text.text("Threshold to consider a circle significant"), true,
             1, 1, 0.001, null);
@@ -126,6 +130,7 @@ public class ClusterMethodFactory extends AbstractFeatureCollectionProcessFactor
         parameters.put(THRESHOLD.key, THRESHOLD);
         parameters.put(SIGNIFICANCE.key, SIGNIFICANCE);
         parameters.put(TESTNAME.key, TESTNAME);
+        parameters.put(NONEIGHBOURS.key, NONEIGHBOURS);
     }
 
     /**
@@ -146,6 +151,8 @@ public class ClusterMethodFactory extends AbstractFeatureCollectionProcessFactor
             return new GamProcess(this);
         }else if(method.equalsIgnoreCase("random")){
             return new RandomProcess(this);
+        }else if(method.equalsIgnoreCase("b&n")){
+            return new BesagAndNewellProcess(this);
         }else {
             throw new IllegalArgumentException("Unknown method " + method);
         }
