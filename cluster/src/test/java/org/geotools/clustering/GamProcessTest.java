@@ -19,8 +19,6 @@ package org.geotools.clustering;
 
 
 import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,20 +27,13 @@ import junit.framework.TestCase;
 import org.geotools.clustering.utils.Utilities;
 
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.data.DataStoreFactorySpi;
 import org.geotools.data.DataUtilities;
-import org.geotools.data.DefaultTransaction;
 import org.geotools.data.FeatureSource;
-import org.geotools.data.FeatureStore;
-import org.geotools.data.Transaction;
 import org.geotools.data.memory.MemoryDataStore;
 import org.geotools.data.shapefile.ShapefileDataStore;
-import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.feature.FeatureCollection;
-import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.process.Process;
 import org.geotools.test.TestData;
-import org.opengis.feature.simple.SimpleFeatureType;
 
 /**
  * @author ijt1
