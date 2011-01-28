@@ -30,7 +30,6 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.DataStoreFactorySpi;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureSource;
-import org.geotools.data.memory.MemoryDataStore;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.feature.FeatureCollection;
@@ -41,9 +40,9 @@ import org.geotools.test.TestData;
  * @author ijt1
  * 
  */
-public class RandomProcessTest extends TestCase {
+public class BessagAnsNewellProcessTest extends TestCase {
 
-    public void testRandomProcess() throws Exception {
+    public void testProcess() throws Exception {
         File f = TestData.file(this, "all_data.shp");
         //System.out.println(f + " " + f.exists());
         URL url = DataUtilities.fileToURL(f);
@@ -63,14 +62,13 @@ public class RandomProcessTest extends TestCase {
        
         Map<String, Object> params = new HashMap<String, Object>();
 
-        params.put(ClusterMethodFactory.NAME.key, "random");
+        params.put(ClusterMethodFactory.NAME.key, "b&n");
         params.put(ClusterMethodFactory.POPULATION.key, features);
         params.put(ClusterMethodFactory.POPATTRIBUTE.key, "pop");
         params.put(ClusterMethodFactory.CANCER.key, features);
         params.put(ClusterMethodFactory.CANATTRIBUTE.key, "cases");
-        params.put(ClusterMethodFactory.MINRAD.key, 1000.0);
-        params.put(ClusterMethodFactory.MAXRAD.key, 5000.0);
-        params.put(ClusterMethodFactory.NCIRCLES.key, 500.0);
+        params.put(ClusterMethodFactory.NONEIGHBOURS.key, 5);
+        
         params.put(ClusterMethodFactory.TESTNAME.key, "poisson");
         ClusterMethodFactory factory = new ClusterMethodFactory();
         Process process = factory.create(params);
@@ -82,11 +80,11 @@ public class RandomProcessTest extends TestCase {
         GridCoverage2D grid = (GridCoverage2D) results.get(ClusterMethodFactory.RESULT.key);
         String basename = f.toString();
         basename=basename.substring(0, basename.length() - 4);
-        String filename = basename + "_rand.tiff";
+        String filename = basename + "_BN.tiff";
         Utilities.writeGrid(filename, grid);
 
         FeatureCollection outfeatures = (FeatureCollection)results.get(ClusterMethodFactory.CIRCLES.key);
-        Utilities.writeCircles(basename+"_rand.shp", outfeatures);
+        Utilities.writeCircles(basename+"_BN.shp", outfeatures);
         
 
     }
