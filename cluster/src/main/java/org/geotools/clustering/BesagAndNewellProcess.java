@@ -4,9 +4,14 @@
  */
 package org.geotools.clustering;
 
+import com.vividsolutions.jts.geom.Point;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import org.geotools.clustering.significance.PoissonTest;
 import org.geotools.clustering.significance.SignificanceTestException;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -15,6 +20,7 @@ import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.filter.text.ecql.ECQL;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.Filter;
+import org.opengis.filter.expression.PropertyName;
 import org.opengis.geometry.MismatchedDimensionException;
 
 /**
@@ -52,28 +58,136 @@ public class BesagAndNewellProcess extends AbstractClusterProcess {
     @Override
     ArrayList<Circle> process() throws MismatchedDimensionException, NoSuchElementException, SignificanceTestException {
         ArrayList<Circle> results = new ArrayList<Circle>();
+        PropertyName popgeom = ff.property(pop.getSchema().getGeometryDescriptor().getName());
+        PropertyName cangeom = ff.property(can.getSchema().getGeometryDescriptor().getName());
         SimpleFeatureCollection justCan = can;
-        Filter filter = ff.greater(canattribute, ff.literal(0.0));
+        Filter canFilter = ff.greater(canattribute, ff.literal(0.0));
         if (sharedData) {
-            justCan = can.subCollection(filter);
+            justCan = can.subCollection(canFilter);
         }
         System.out.println("considering " + justCan.size() + " of " + can.size() + " case points");
         //find a case point
         SimpleFeatureIterator it = null;
+        final int size = justCan.size();
+        /*
+         * TODO: replace this with a more efficient algorithm
+         * for any realistic size dataset this will suck!
+         */
+        double[][] distances = new double[size][size];
+        HashMap<Integer, TreeMap<Double, Integer>> lists = new HashMap<Integer, TreeMap<Double, Integer>>();
+        SimpleFeature[] cancers = new SimpleFeature[size];
+        int count = 0;
         try {
             it = justCan.features();
             while (it.hasNext()) {
-                SimpleFeature feature = it.next();
-
-                //find K nearest neighbours
-                //construct circle that includes those neighbours
-                //process circle
-                //find K nearest neighbours
-                //construct circle that includes those neighbours
-                //process circle
+                cancers[count++] = it.next();
             }
         } finally {
             it.close();
+        }
+        for (int i = 0; i < size; i++) {
+            TreeMap<Double, Integer> index = new TreeMap<Double, Integer>();
+            Point thisPoint = (Point) cancers[i].getDefaultGeometry();
+            for (int j = 0; j < size; j++) {
+                distances[i][j] = thisPoint.distance((Point) cancers[j].getDefaultGeometry());
+                index.put(distances[i][j], j);
+            }
+            lists.put(i, index);
+        }
+        TreeMap<Double, Integer> dis;
+        SimpleFeatureIterator popIt = null;
+        SimpleFeatureIterator canIt = null;
+        try {
+            int counter = 0;
+            it = justCan.features();
+            while (it.hasNext()) {
+                SimpleFeature feature = it.next();
+                //find K nearest neighbours
+                dis = lists.get(counter++);
+                count = 0;
+                double radius = 0.0;
+                for (Double key : dis.keySet()) {
+                    int index = dis.get(key);
+                    radius = key.doubleValue();
+                    System.out.println(index + " is " + key.toString() + " away");
+                    count++;
+                    if (count > k) {// don't count this point
+                        break;
+                    }
+
+                }
+
+                //construct circle that includes those neighbours
+                Circle circle = new Circle((Point) feature.getDefaultGeometry(), radius);
+                double popCount = 0;
+                double canCount = 0;
+                Filter filter = ff.within(popgeom, ff.literal(circle.toPolygon()));
+                // System.out.println(filter);
+                // get pop points in circle
+                SimpleFeatureCollection popPoints = pop.subCollection(filter);
+                if (popPoints.size() > 0) {
+                    // System.out.println(circle + " got " + popPoints.size()
+                    // + " pop points");
+                    popIt = popPoints.features();
+                    while (popIt.hasNext()) {
+                        SimpleFeature feature2 = popIt.next();
+                        Object evaluate = popattribute.evaluate(feature2);
+                        // System.out.println(evaluate);
+                        Number count2 = (Number) evaluate;
+                        popCount += (count2.doubleValue() * overrat);
+                        if (sharedData) {
+                            evaluate = canattribute.evaluate(feature2);
+                            // System.out.println(evaluate);
+                            count2 = (Number) evaluate;
+                            canCount += count2.doubleValue();
+                        }
+                    }
+                    // System.out.println("\tContaining " + popCount + " people");
+                    // System.out.println("\tContaining " + popCount + " people");
+                }
+                filter = ff.within(cangeom, ff.literal(circle.toPolygon()));
+                // System.out.println(filter);
+                // get pop points in circle
+                if (!sharedData) {
+                    SimpleFeatureCollection canPoints = justCan.subCollection(filter);
+                    if (canPoints.size() > 0) {
+                        // System.out.println(circle + " got " + canPoints.size()
+                        // + " case points");
+                        canIt = canPoints.features();
+                        while (canIt.hasNext()) {
+                            SimpleFeature feature2 = canIt.next();
+                            final Object evaluate = canattribute.evaluate(feature);
+                            // System.out.println(evaluate);
+                            Number count2 = (Number) evaluate;
+                            canCount += count2.doubleValue();
+                        }
+                        // System.out.println("\tContaining " + canCount +
+                        // " cases");
+                        // System.out.println("\tContaining " + canCount +
+                        // " cases");
+                    } // canPoints > 0
+                } // sharedData
+                //process circle
+                if (test.isWorthTesting(popCount, canCount)) {
+                    if (test.isSignificant(popCount, canCount)) {
+                        double stat = test.getStatistic();
+                        circle.setStatistic(stat);
+                        results.add(circle);
+                        // System.out.println(circle + " " + stat);
+                    } else {
+                        // System.out.println("not significant with " + popCount
+                        // + canCount + " cases");
+                    }
+                } else {
+                    // System.out.println("not worth testing " + popCount + " with "
+                    // + canCount + " cases");
+                }
+
+            }
+        } finally {
+            if(it!=null)it.close();
+            if(canIt!=null)canIt.close();
+            if(popIt!=null)popIt.close();
         }
         return results;
     }
