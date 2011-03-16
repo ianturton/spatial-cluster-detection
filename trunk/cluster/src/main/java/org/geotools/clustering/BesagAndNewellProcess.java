@@ -7,11 +7,9 @@ package org.geotools.clustering;
 import com.vividsolutions.jts.geom.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import org.geotools.clustering.significance.PoissonTest;
 import org.geotools.clustering.significance.SignificanceTestException;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -114,7 +112,6 @@ public class BesagAndNewellProcess extends AbstractClusterProcess {
                     if (count > k) {// don't count this point
                         break;
                     }
-
                 }
 
                 //construct circle that includes those neighbours
