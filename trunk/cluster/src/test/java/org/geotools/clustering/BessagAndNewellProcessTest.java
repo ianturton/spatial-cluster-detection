@@ -40,7 +40,7 @@ import org.geotools.test.TestData;
  * @author ijt1
  * 
  */
-public class BessagAnsNewellProcessTest extends TestCase {
+public class BessagAndNewellProcessTest extends TestCase {
 
     public void testProcess() throws Exception {
         File f = TestData.file(this, "all_data.shp");
