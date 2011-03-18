@@ -92,7 +92,7 @@ public class JaiToolsCircle {
     }
 
     protected final void quantize(Circle c) {
-        org.geotools.clustering.utils.ClusterKernelFactory.ValueType type = org.geotools.clustering.utils.ClusterKernelFactory.ValueType.EPANECHNIKOV; 
+        ClusterKernelFactory.ValueType type = ClusterKernelFactory.ValueType.EPANECHNIKOV; 
         float centreValue = (float) c.getStatistic();
         int radius = (int) (Math.floor(((c.radius + cellsize))) / cellsize);
         System.out.println("radius "+radius+" "+c.radius);
