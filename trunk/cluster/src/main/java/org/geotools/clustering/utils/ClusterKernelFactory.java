@@ -123,7 +123,7 @@ public class ClusterKernelFactory extends KernelFactory{
 
                 if (fcomp(r2, dist2) >= 0) {
                     if (type == ValueType.EPANECHNIKOV) {
-                        value = 1.0f - dist2 / r2; // 1- u^2
+                        value = (3.0f/4.0f)*(1.0f - dist2 / r2); // 1- u^2
                         sum += value;
                     } else if (type == ValueType.DISTANCE) {
                         value = (float) Math.sqrt(dist2);
@@ -140,11 +140,11 @@ public class ClusterKernelFactory extends KernelFactory{
 
         for (int x = -radius; x <= radius; x++, k0++) {
             float value;
-            if (x == 0) {
+            if (x == 0 && !(type == ValueType.EPANECHNIKOV)) {
                 value = centreValue;
             } else {
                 if (type == ValueType.EPANECHNIKOV) {
-                    value = 1.0f - (x * x) / r2; // 1- u^2
+                    value = (3.0f/4.0f)*(1.0f - (x*x) / r2); // 1- u^2
                     sum += value;
                 } else if (type == ValueType.DISTANCE) {
                     value = (float) Math.sqrt(x * x);
@@ -156,14 +156,14 @@ public class ClusterKernelFactory extends KernelFactory{
             }
             weights[k0] = value;
         }
-        if (type == ValueType.EPANECHNIKOV) {
+        /*if (type == ValueType.EPANECHNIKOV) {
             if (sum > 0.0) {
                 sum = 1.0f / sum;
             }
             for (int j = 0; j < weights.length; j++) {
                 weights[j] *= sum;
             }
-        }
+        }*/
         return new KernelJAI(width, width, weights);
     }
 
