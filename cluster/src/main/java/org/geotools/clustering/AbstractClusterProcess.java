@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.NoSuchElementException; 
 import org.geotools.clustering.significance.SignificanceTestException;
 import org.geotools.clustering.significance.SignificanceTest;
 import org.geotools.clustering.utils.Utilities;
@@ -55,9 +55,12 @@ public abstract class AbstractClusterProcess extends AbstractProcess {
         for (Circle c : results) {
             resBounds.expandToInclude(c.getBounds());
         }
+        
         System.out.println(resBounds);
         final double scale = 100.0;
-        QuantizeCircle qc = new QuantizeCircle(resBounds, scale);
+        resBounds.expandBy(scale*2.0);
+        //        QuantizeCircle qc = new QuantizeCircle(resBounds, scale);
+        JaiToolsCircle qc = new JaiToolsCircle(resBounds, scale);
         return qc.processCircles(results);
     }
 
