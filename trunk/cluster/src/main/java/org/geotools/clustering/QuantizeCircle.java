@@ -146,7 +146,7 @@ public class QuantizeCircle {
             double max = w;//radius + cellsize / 2.0;
             //System.out.println(min + " " + max);
             numb = (int) (Math.ceil((2.0 * (radius + cellsize))) / cellsize);
-
+           
             xker = new double[numb * numb];
             xadr = new double[numb * numb];
             yadr = new double[numb * numb];
@@ -201,12 +201,17 @@ public class QuantizeCircle {
      * @param value
      */
     protected GridCoordinates2D addToCell(double x, double y, double value) {
-        GridCoordinates2D gridCoords;
+        GridCoordinates2D gridCoords = new GridCoordinates2D();
         int ix;
         int iy;
         DirectPosition2D pos = new DirectPosition2D(x, y);
+        DirectPosition2D dest = new DirectPosition2D();
         try {
-            gridCoords = gg.worldToGrid(pos);
+             gg.getCRSToGrid2D().transform((DirectPosition)pos,dest);
+             gridCoords = gg.worldToGrid(pos);
+             System.out.println("pos "+pos+"\ndst "+dest+"\ngrd "+gridCoords);
+             gridCoords.x = (int) Math.floor(dest.x);
+             gridCoords.y = (int) Math.floor(dest.y);
         } catch (InvalidGridGeometryException e) {
             System.out.println(e);
             return null;
