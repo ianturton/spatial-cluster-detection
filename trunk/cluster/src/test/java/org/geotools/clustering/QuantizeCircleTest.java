@@ -28,7 +28,6 @@ import junit.framework.TestCase;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.feature.FeatureCollection;
-import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.opengis.coverage.grid.GridEnvelope;
@@ -38,15 +37,11 @@ import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
 import java.io.File;
 import org.geotools.clustering.utils.Utilities;
+import org.geotools.clustering.Circle;
 import org.geotools.coverage.grid.GridCoordinates2D;
-import org.geotools.coverage.grid.ViewType;
-import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.test.TestData;
-import org.opengis.filter.expression.Add;
 import org.opengis.referencing.operation.TransformException;
 
 /**
@@ -184,8 +179,8 @@ public class QuantizeCircleTest extends TestCase {
             xx = min;
             int m = 0;
             sum = 0;
-            int lastI = 0;
-            int lastJ = 0;
+            int lastI = Integer.MAX_VALUE;
+            int lastJ = Integer.MAX_VALUE;
             double x = c.getCentre().getX();
             x = Math.ceil((x + cellsize / 2.0) / cellsize) * cellsize;
             double y = c.getCentre().getY();
