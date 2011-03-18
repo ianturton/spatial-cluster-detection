@@ -33,12 +33,13 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
- *
+ * 
  * @author ijt1
  */
 public class Utilities {
 
-    static public void writeCircles(File name, FeatureCollection outfeatures) throws IOException, MalformedURLException {
+    static public void writeCircles(File name, FeatureCollection outfeatures) throws IOException,
+            MalformedURLException {
         DataStoreFactorySpi dataStoreFactory = new ShapefileDataStoreFactory();
 
         System.out.println("writing " + name.getAbsolutePath());
@@ -46,7 +47,8 @@ public class Utilities {
         Map<String, Serializable> params2 = new HashMap<String, Serializable>();
         params2.put("url", url);
         params2.put("create spatial index", Boolean.TRUE);
-        ShapefileDataStore newDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(params2);
+        ShapefileDataStore newDataStore = (ShapefileDataStore) dataStoreFactory
+                .createNewDataStore(params2);
         newDataStore.createSchema((SimpleFeatureType) outfeatures.getSchema());
         Transaction transaction = new DefaultTransaction("create");
         String typeName = newDataStore.getTypeNames()[0];
@@ -71,12 +73,14 @@ public class Utilities {
         writeCircles(newFile, circles);
     }
 
-    static public void writeGrid(File out, GridCoverage2D grid) throws IndexOutOfBoundsException, IOException, IllegalArgumentException {
+    static public void writeGrid(File out, GridCoverage2D grid) throws IndexOutOfBoundsException,
+            IOException, IllegalArgumentException {
         GeoTiffWriter gtw = new GeoTiffWriter(out);
         gtw.write(grid, null);
     }
 
-    static public void writeGrid(String name, GridCoverage2D grid) throws IndexOutOfBoundsException, IOException {
+    static public void writeGrid(String name, GridCoverage2D grid)
+            throws IndexOutOfBoundsException, IOException {
         if (!name.endsWith(".tiff")) {
             name = name + ".tiff";
         }
@@ -84,7 +88,8 @@ public class Utilities {
         writeGrid(out, grid);
     }
 
-    static public FeatureCollection circles2FeatureCollection(ArrayList<Circle> results, CoordinateReferenceSystem crs) {
+    static public FeatureCollection circles2FeatureCollection(ArrayList<Circle> results,
+            CoordinateReferenceSystem crs) {
         SimpleFeature feature;
         FeatureCollection circles = FeatureCollections.newCollection();
         SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();
