@@ -46,7 +46,7 @@ public class ClusterMethodFactory extends AbstractFeatureCollectionProcessFactor
      * <p>
      * This parameter is mandatory.
      */
-    static final Parameter<String> POPATTRIBUTE = new Parameter<String>(
+    public static final Parameter<String> POPATTRIBUTE = new Parameter<String>(
             "popattribute",
             String.class,
             Text.text("Population Attribute"),
@@ -55,7 +55,7 @@ public class ClusterMethodFactory extends AbstractFeatureCollectionProcessFactor
             1, 1, null, null);
     public static final Parameter<FeatureCollection> CANCER = new Parameter<FeatureCollection>(
             "cancer", FeatureCollection.class, Text.text("Features containing incidents"), Text.text("Features containing the incidents"));
-    static final Parameter<String> CANATTRIBUTE = new Parameter<String>(
+    public static final Parameter<String> CANATTRIBUTE = new Parameter<String>(
             "canattribute",
             String.class,
             Text.text("Incident Attribute"),
@@ -66,40 +66,40 @@ public class ClusterMethodFactory extends AbstractFeatureCollectionProcessFactor
     public static final Parameter<String> NAME = new Parameter<String>("type", String.class,
             Text.text("Type of Method required"), Text.text("What type of method (GAM)"), true, 1,
             1, "GAM", null);
-    static final Parameter<Double> MINRAD = new Parameter<Double>("MINRAD", Double.class,
+    public static final Parameter<Double> MINRAD = new Parameter<Double>("MINRAD", Double.class,
             Text.text("Minimum Radius"), Text.text("Radius of the smallest circle"), true,
             1, 1, 5.0, null);
-    static final Parameter<Double> MAXRAD = new Parameter<Double>("MaxRAD", Double.class,
+    public static final Parameter<Double> MAXRAD = new Parameter<Double>("MaxRAD", Double.class,
             Text.text("Maximum Radius"), Text.text("Radius of the largest circle"), true,
             1, 1, 5.0, null);
-    static final Parameter<Double> OVERLAP = new Parameter<Double>("overlap", Double.class,
-            Text.text("Circle Overlap"), Text.text("% of radius to overlap circles"), true,
+    public static final Parameter<Double> OVERLAP = new Parameter<Double>("overlap", Double.class,
+            Text.text("Circle Overlap"), Text.text("% of radius to overlap circles"), false,
             1, 1, 0.5, null);
-    static final Parameter<Double> STEP = new Parameter<Double>("step", Double.class,
-            Text.text("Radius Step"), Text.text("Step Size of radius"), true,
+    public static final Parameter<Double> STEP = new Parameter<Double>("step", Double.class,
+            Text.text("Radius Step"), Text.text("Step Size of radius"), false,
             1, 1, 5.0, null);
     public static final Parameter<String> TESTNAME = new Parameter<String>("test", String.class,
-            Text.text("Name of Statistic"), Text.text("Type of Statistical test to use"), true, 1,
+            Text.text("Name of Statistic"), Text.text("Type of Statistical test to use"), false, 1,
             1, "Poisson", null);
 
-    static final Parameter<Double> THRESHOLD = new Parameter<Double>("threshold", Double.class,
-            Text.text("Threshold"), Text.text("minimum number of points to be considered"), true,
+    public static final Parameter<Double> THRESHOLD = new Parameter<Double>("threshold", Double.class,
+            Text.text("Threshold"), Text.text("minimum number of points to be considered"), false,
             1, 1, 1.0, null);
 
-    static final Parameter<Integer> MINPOP = new Parameter<Integer>("minpop", Integer.class,
-            Text.text("Minium Population"), Text.text("minimum population to be considered"), true,
+    public static final Parameter<Integer> MINPOP = new Parameter<Integer>("minpop", Integer.class,
+            Text.text("Minium Population"), Text.text("minimum population to be considered"), false,
             1, 1, 1, null);
-    static final Parameter<Integer> MINCAN = new Parameter<Integer>("mincan", Integer.class,
-            Text.text("Minium Incidence"), Text.text("minimum number of cases to be considered"), true,
+    public static final Parameter<Integer> MINCAN = new Parameter<Integer>("mincan", Integer.class,
+            Text.text("Minium Incidence"), Text.text("minimum number of cases to be considered"), false,
             1, 1, 1, null);
-    static final Parameter<Integer> NCIRCLES = new Parameter<Integer>("NCIRCLES", Integer.class,
-            Text.text("Number of Circles"), Text.text("Number of circles to be generated"), true,
+    public static final Parameter<Integer> NCIRCLES = new Parameter<Integer>("NCIRCLES", Integer.class,
+            Text.text("Number of Circles"), Text.text("Number of circles to be generated"), false,
             1, 1, 1, null);
-    static final Parameter<Integer> NONEIGHBOURS = new Parameter<Integer>("NONEIGHBOURS", Integer.class,
-            Text.text("Number of Neighbours"), Text.text("Number of neighbours to be considered"), true,
+    public static final Parameter<Integer> NONEIGHBOURS = new Parameter<Integer>("NONEIGHBOURS", Integer.class,
+            Text.text("Number of Neighbours"), Text.text("Number of neighbours to be considered"), false,
             1, 1, 1, null); 
-    static final Parameter<Double> SIGNIFICANCE = new Parameter<Double>("significance", Double.class,
-            Text.text("Significance threshold"), Text.text("Threshold to consider a circle significant"), true,
+    public static final Parameter<Double> SIGNIFICANCE = new Parameter<Double>("significance", Double.class,
+            Text.text("Significance threshold"), Text.text("Threshold to consider a circle significant"), false,
             1, 1, 0.001, null);
     
     public static final Parameter<GridCoverage2D> RESULT = new Parameter<GridCoverage2D>("result",
@@ -143,7 +143,7 @@ public class ClusterMethodFactory extends AbstractFeatureCollectionProcessFactor
         resultInfo.put(CIRCLES.key, CIRCLES);
     }
 
-    protected Process create(Map<String, Object> parameters) throws IllegalArgumentException {
+    public Process create(Map<String, Object> parameters) throws IllegalArgumentException {
         // TODO Auto-generated method stub
         
         String method = (String) parameters.get("type");
