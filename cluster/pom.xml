@@ -13,7 +13,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<geotools.version>2.8-SNAPSHOT</geotools.version>
+		<geotools.version>8-SNAPSHOT</geotools.version>
 	</properties>
 	<build>
 		<plugins>
@@ -24,8 +24,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.5</source>  <!-- The -source argument for the Java compiler. -->
-					<target>1.5</target>  <!-- The -target argument for the Java compiler. -->
+					<source>1.6</source>  <!-- The -source argument for the Java compiler. -->
+					<target>1.6</target>  <!-- The -target argument for the Java compiler. -->
 					<debug>true</debug>   <!-- Whether to include debugging information. -->
 					<encoding>UTF-8</encoding> <!-- The -encoding argument for the Java co mpiler. -->
 					<!-- On java6 the build oom's otherwise due to the compiler accumulati 
