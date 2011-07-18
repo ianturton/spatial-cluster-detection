@@ -167,7 +167,7 @@ nuclear power plants in Great Britain}} which reported that there was no evidenc
 \item A simple standard that allows web browsers to download pictures of maps
 \item Ideal if the end user has little or no GIS experience (or doesn’t want to pay for ArcMap). 
 \item Can be served on top of Google maps for easy base map provision
-\item \textbf{we will use WMS to provide easy access to the results of our analysis}
+\item \textbf{We will use WMS to provide easy access to the results of our analysis}
 \end{itemize}
 \end{frame}
 \begin{frame}[t]
@@ -175,7 +175,7 @@ nuclear power plants in Great Britain}} which reported that there was no evidenc
 \begin{itemize}
 \item Serve up actual geographic data 
 \item useful for sharing vector data from a central repository to many users
-
+\item \textbf{We will use WFS to provide the inputs to our analysis}
 \end{itemize}
 \end{frame}
 \begin{frame}[t]
@@ -184,6 +184,7 @@ nuclear power plants in Great Britain}} which reported that there was no evidenc
 
 \item A newer OGC standard \citep{OGC2007} that provides a defined protocol for executing remote processes on geographic data.
 \item Can take inputs from WFS servers or local files
+\item Advanced users can define a sub WPS process to produce the population at risk using a model.
 \item returns results as downloadable files or WMS results
 \end{itemize}
 \end{frame}
@@ -193,6 +194,7 @@ nuclear power plants in Great Britain}} which reported that there was no evidenc
 \frametitle{GeoTools}
 \begin{itemize}
 \item GeoTools is an open source Java library for geospatial operations \citep{Hall2008}
+\item GeoTools provides an abstracted datastore model, simple features and a variety of OGC standards (Filtering, Styling etc).
 \item Code and documentation are available at \url{http://geotools.org}
 \end{itemize}
 \end{frame}
@@ -213,6 +215,7 @@ nuclear power plants in Great Britain}} which reported that there was no evidenc
 \item First developed under ESRC funding in FORTRAN
 \item Rewritten in Java under EU Spin! grant
 \item Now completely rewritten to use GeoTools and WPS processing tools
+\item Go to \url{http://code.google.com/p/spatial-cluster-detection/} to try out the code or join us in development, 
 \end{itemize}
 \end{frame}
 
@@ -223,7 +226,12 @@ nuclear power plants in Great Britain}} which reported that there was no evidenc
 
 \section{Conclusions}
 \begin{frame}[t]
-\frametitle{}
+\frametitle{Conclusions}
+\begin{itemize}
+\item It works
+\item It needs more work 
+\item Would you like to help? Go to \href{http://code.google.com/p/spatial-cluster-detection/}{http://code.google.com/p/spatial-cluster-detection/}
+\end{itemize}
 \end{frame}
 
 
