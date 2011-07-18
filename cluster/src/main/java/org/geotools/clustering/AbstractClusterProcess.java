@@ -92,6 +92,7 @@ public abstract class AbstractClusterProcess extends AbstractProcess {
                 Number count = (Number) evaluate;
                 totalPop += count.doubleValue();
             }
+            popIt.close();
             SimpleFeatureIterator canIt = can.features();
             double totalCan = 0.0;
             while (canIt.hasNext()) {
@@ -101,6 +102,7 @@ public abstract class AbstractClusterProcess extends AbstractProcess {
                 Number count = (Number) evaluate;
                 totalCan += count.doubleValue();
             }
+            canIt.close();
             overrat = (double) totalCan / (double) totalPop;
             mon.setTask(Text.text("Processing Data"));
             mon.progress(10.0F);
