@@ -19,6 +19,9 @@ package org.geotools.clustering;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.NoSuchElementException;
+
+import org.geotools.clustering.significance.BootstrapTest;
+import org.geotools.clustering.significance.MonteCarloTest;
 import org.geotools.clustering.significance.SignificanceTestException;
 
 import org.geotools.clustering.significance.PoissonTest;
@@ -92,7 +95,23 @@ public class GamProcess extends AbstractClusterProcess {
 		// switch the statistic name (when we have more tests)
 		if ("Poisson".equalsIgnoreCase(testName)) {
 			test = new PoissonTest(input);
-		} else {
+		}else if("MonteCarlo".equalsIgnoreCase(testName)){
+        	try {
+				test = new MonteCarloTest(input);
+			} catch (SignificanceTestException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new ClusterException(e);
+			}
+        } else if("Bootstrap".equalsIgnoreCase(testName)){
+        	try {
+				test = new BootstrapTest(input);
+			} catch (SignificanceTestException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new ClusterException(e);
+			}
+        }else {
 			if (testName.length() > 0) {
 				throw new IllegalArgumentException("Unknown statistical test "
 						+ testName);

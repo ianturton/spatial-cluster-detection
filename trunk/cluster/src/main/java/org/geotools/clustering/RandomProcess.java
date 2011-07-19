@@ -19,6 +19,9 @@ package org.geotools.clustering;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.NoSuchElementException;
+
+import org.geotools.clustering.significance.BootstrapTest;
+import org.geotools.clustering.significance.MonteCarloTest;
 import org.geotools.clustering.significance.PoissonTest;
 import org.geotools.clustering.significance.SignificanceTestException;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -74,6 +77,7 @@ public class RandomProcess extends AbstractClusterProcess {
             Circle circle = new Circle(x, y, rad);
             double popCount = 0;
             double canCount = 0;
+            int numberOfPoints=0;
             Filter filter = ff.within(popgeom, ff.literal(circle.toPolygon()));
             // System.out.println(filter);
             // get pop points in circle
@@ -94,6 +98,7 @@ public class RandomProcess extends AbstractClusterProcess {
                         count = (Number) evaluate;
                         canCount += count.doubleValue();
                     }
+                    numberOfPoints++;
                 }
                 // System.out.println("\tContaining " + popCount + " people");
                 
@@ -114,9 +119,11 @@ public class RandomProcess extends AbstractClusterProcess {
                         Number count = (Number) evaluate;
                         canCount += count.doubleValue();
                     }
-                    
+                    numberOfPoints++;
                 } // canPoints > 0
             } // sharedData
+           
+			test.setNumberOfPoints(numberOfPoints);
             if (test.isWorthTesting(popCount, canCount)
                     && test.isSignificant(popCount, canCount)) {
                 double stat = test.getStatistic();
@@ -157,7 +164,24 @@ public class RandomProcess extends AbstractClusterProcess {
         // switch the statistic name (when we have more tests)
         if ("Poisson".equalsIgnoreCase(testName)) {
             test = new PoissonTest(input);
-        } else {
+        } else if("MonteCarlo".equalsIgnoreCase(testName)){
+        	try {
+				test = new MonteCarloTest(input);
+			} catch (SignificanceTestException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new ClusterException(e);
+			}
+        }else if("Bootstrap".equalsIgnoreCase(testName)){
+        	try {
+				test = new BootstrapTest(input);
+			} catch (SignificanceTestException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new ClusterException(e);
+			}
+        }else {
+        
             if (testName.length() > 0) {
                 throw new IllegalArgumentException("Unknown statistical test " + testName);
             } else {

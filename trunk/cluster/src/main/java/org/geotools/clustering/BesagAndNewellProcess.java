@@ -10,6 +10,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.TreeMap;
+
+import org.geotools.clustering.significance.BootstrapTest;
+import org.geotools.clustering.significance.MonteCarloTest;
 import org.geotools.clustering.significance.PoissonTest;
 import org.geotools.clustering.significance.SignificanceTestException;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -217,7 +220,23 @@ public class BesagAndNewellProcess extends AbstractClusterProcess {
         // switch the statistic name (when we have more tests)
         if ("Poisson".equalsIgnoreCase(testName)) {
             test = new PoissonTest(input);
-        } else {
+        } else if("MonteCarlo".equalsIgnoreCase(testName)){
+        	try {
+				test = new MonteCarloTest(input);
+			} catch (SignificanceTestException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new ClusterException(e);
+			}
+        } else if("Bootstrap".equalsIgnoreCase(testName)){
+        	try {
+				test = new BootstrapTest(input);
+			} catch (SignificanceTestException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new ClusterException(e);
+			}
+        }else {
             if (testName.length() > 0) {
                 throw new IllegalArgumentException("Unknown statistical test " + testName);
             } else {
