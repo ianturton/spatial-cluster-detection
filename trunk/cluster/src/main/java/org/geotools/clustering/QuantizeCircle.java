@@ -209,7 +209,7 @@ public class QuantizeCircle {
         try {
              gg.getCRSToGrid2D().transform((DirectPosition)pos,dest);
              gridCoords = gg.worldToGrid(pos);
-             System.out.println("pos "+pos+"\ndst "+dest+"\ngrd "+gridCoords);
+             //System.out.println("pos "+pos+"\ndst "+dest+"\ngrd "+gridCoords);
              gridCoords.x = (int) Math.floor(dest.x);
              gridCoords.y = (int) Math.floor(dest.y);
         } catch (InvalidGridGeometryException e) {
