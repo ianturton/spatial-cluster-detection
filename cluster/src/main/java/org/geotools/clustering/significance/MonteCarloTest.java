@@ -10,18 +10,14 @@ import org.geotools.data.DataUtilities;
 import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.expression.Expression;
-import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.SchemaException;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.filter.text.ecql.ECQL;
-import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.text.Text;
-
-import com.vividsolutions.jts.geom.GeometryFactory;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.filter.expression.Expression;
 
 public class MonteCarloTest extends SignificanceTest {
 	// Monte Carlo test class for cluster methods
@@ -33,6 +29,7 @@ public class MonteCarloTest extends SignificanceTest {
 	
 	private boolean sharedData;
 	private int hH, maxMC;
+	private ArrayList<SimpleFeature> features;
 	public static final Parameter<Integer> MONTECARLOREJECTIONCOUNT = new Parameter<Integer>(
 			"MONTECARLOREJECTIONCOUNT", Integer.class, Text
 					.text("Monte Carlo Test rejection count"), Text
@@ -44,7 +41,7 @@ public class MonteCarloTest extends SignificanceTest {
 			Text.text("The size of the sampe to use in the Monte Carlo test"),
 			false, 50, 500, 200, null);
 
-	public MonteCarloTest(Map<String, Object> params) throws ClusterException {
+	public MonteCarloTest(Map<String, Object> params) throws ClusterException, SignificanceTestException {
 		super(params);
 		name = "Monte Carlo";
 		if (canProcess(params)) {
@@ -76,6 +73,86 @@ public class MonteCarloTest extends SignificanceTest {
 					.get(MONTECARLOREJECTIONCOUNT.key);
 			maxMC = (Integer) params
 					.get(MONTECARLOSAMPLESIZE.key);// MonteCarloSampleSize();
+			SimpleFeatureType TYPE;
+			try {
+				TYPE = DataUtilities.createType("Location", "location:Point,"
+						+ "pop:Double," + "cases:Double");
+			} catch (SchemaException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new SignificanceTestException(e.getMessage());
+			}
+			
+
+			SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder(TYPE);
+			features = new ArrayList<SimpleFeature>();
+			if (!sharedData) {
+				SimpleFeatureIterator popIt = null;
+				int popcount = 0;
+				try {
+					popIt = pop.features();
+					while (popIt.hasNext()) {
+						SimpleFeature feature = popIt.next();
+						final Object evaluate = popattribute.evaluate(feature);
+						// System.out.println(evaluate);
+						Number count1 = (Number) evaluate;
+						popcount += count1.doubleValue();
+						featureBuilder.add(feature.getDefaultGeometry());
+						featureBuilder.add(count1);
+						featureBuilder.add(0.0);
+						SimpleFeature feature2 = featureBuilder.buildFeature(null);
+						features.add(feature2);
+					}
+				} finally {
+					popIt.close();
+				}
+				SimpleFeatureIterator canIt = null;
+
+				try {
+					canIt = can.features();
+					while (canIt.hasNext()) {
+						SimpleFeature feature = canIt.next();
+						final Object evaluate = canattribute.evaluate(feature);
+						// System.out.println(evaluate);
+						Number count1 = (Number) evaluate;
+						//System.out.println("cases sample "+feature.getID()+" "+count1);
+						featureBuilder.add(feature.getDefaultGeometry());
+						featureBuilder.add(0.0);
+						featureBuilder.add(count1);
+						SimpleFeature feature2 = featureBuilder.buildFeature(null);
+						features.add(feature2);
+					}
+				} finally {
+					canIt.close();
+				}
+			} else {
+				SimpleFeatureIterator popIt = null;
+
+				try {
+					popIt = pop.features();
+					while (popIt.hasNext()) {
+						SimpleFeature feature = popIt.next();
+						final Object evaluate = popattribute.evaluate(feature);
+						// System.out.println(evaluate);
+						Number count1 = (Number) evaluate;
+						
+						final Object evaluate2 = canattribute.evaluate(feature);
+						// System.out.println(evaluate);
+						Number count2 = (Number) evaluate2;
+						
+						featureBuilder.add(feature.getDefaultGeometry());
+						featureBuilder.add(count1);
+						//System.out.println("cases sample "+feature.getID()+" "+count2);
+						featureBuilder.add(count2);
+						SimpleFeature feature2 = featureBuilder.buildFeature(null);
+						features.add(feature2);
+					}
+				} finally {
+					popIt.close();
+				}
+
+			}
+
 		}
 	}
 
@@ -100,87 +177,7 @@ public class MonteCarloTest extends SignificanceTest {
 		if (!isWorthTesting(obsP, obsC))
 			return false;
 		// generate a list of features to do selection against
-		SimpleFeatureType TYPE;
-		try {
-			TYPE = DataUtilities.createType("Location", "location:Point,"
-					+ "pop:Double," + "cases:Double");
-		} catch (SchemaException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			throw new SignificanceTestException(e.getMessage());
-		}
-		GeometryFactory geometryFactory = JTSFactoryFinder
-				.getGeometryFactory(null);
-
-		SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder(TYPE);
-		ArrayList<SimpleFeature> features = new ArrayList<SimpleFeature>();
-		if (!sharedData) {
-			SimpleFeatureIterator popIt = null;
-
-			try {
-				popIt = pop.features();
-				while (popIt.hasNext()) {
-					SimpleFeature feature = popIt.next();
-					final Object evaluate = popattribute.evaluate(feature);
-					// System.out.println(evaluate);
-					Number count1 = (Number) evaluate;
-					popcount += count1.doubleValue();
-					featureBuilder.add(feature.getDefaultGeometry());
-					featureBuilder.add(count1);
-					featureBuilder.add(0.0);
-					SimpleFeature feature2 = featureBuilder.buildFeature(null);
-					features.add(feature2);
-				}
-			} finally {
-				popIt.close();
-			}
-			SimpleFeatureIterator canIt = null;
-
-			try {
-				canIt = can.features();
-				while (canIt.hasNext()) {
-					SimpleFeature feature = canIt.next();
-					final Object evaluate = canattribute.evaluate(feature);
-					// System.out.println(evaluate);
-					Number count1 = (Number) evaluate;
-					//System.out.println("cases sample "+feature.getID()+" "+count1);
-					featureBuilder.add(feature.getDefaultGeometry());
-					featureBuilder.add(0.0);
-					featureBuilder.add(count1);
-					SimpleFeature feature2 = featureBuilder.buildFeature(null);
-					features.add(feature2);
-				}
-			} finally {
-				canIt.close();
-			}
-		} else {
-			SimpleFeatureIterator popIt = null;
-
-			try {
-				popIt = pop.features();
-				while (popIt.hasNext()) {
-					SimpleFeature feature = popIt.next();
-					final Object evaluate = popattribute.evaluate(feature);
-					// System.out.println(evaluate);
-					Number count1 = (Number) evaluate;
-					
-					final Object evaluate2 = canattribute.evaluate(feature);
-					// System.out.println(evaluate);
-					Number count2 = (Number) evaluate2;
-					
-					featureBuilder.add(feature.getDefaultGeometry());
-					featureBuilder.add(count1);
-					//System.out.println("cases sample "+feature.getID()+" "+count2);
-					featureBuilder.add(count2);
-					SimpleFeature feature2 = featureBuilder.buildFeature(null);
-					features.add(feature2);
-				}
-			} finally {
-				popIt.close();
-			}
-
-		}
-
+		
 		r = 0;
 		count = 0;
 

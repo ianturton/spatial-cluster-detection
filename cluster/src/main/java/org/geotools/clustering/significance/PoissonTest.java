@@ -25,7 +25,7 @@ import java.util.Set;
  * 
  */
 public class PoissonTest extends SignificanceTest {
-    public static final int MAXCAN = 500;
+    public static final int MAXCAN = 300;
 
     private double[] cons;
 
