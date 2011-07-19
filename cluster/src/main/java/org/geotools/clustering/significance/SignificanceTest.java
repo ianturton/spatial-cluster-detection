@@ -29,7 +29,7 @@ import org.geotools.text.Text;
  */
 public abstract class SignificanceTest {
     static String name;
-
+    protected int numberOfPoints = 0;
     static final Parameter<Boolean> EXCESS = new Parameter<Boolean>("excess", Boolean.class,
             Text.text("Test Excess"),
             Text.text("Should the test be to find an excess (true) or a deficiency (false)"),
@@ -63,7 +63,7 @@ public abstract class SignificanceTest {
 
     public abstract double getStatistic();
 
-    public final Parameter<?>[] getParametersInfo() {
+    public Parameter<?>[] getParametersInfo() {
         LinkedHashMap<String, Parameter<?>> map = new LinkedHashMap<String, Parameter<?>>();
         setupParameters(map);
 
@@ -115,4 +115,8 @@ public abstract class SignificanceTest {
     public static String getName() {
         return name;
     }
+
+	public void setNumberOfPoints(int numberOfPoints) {
+		this.numberOfPoints = numberOfPoints;
+	}
 }
