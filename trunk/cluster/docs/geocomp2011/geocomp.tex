@@ -134,7 +134,8 @@ Independent Researcher\\
   \item Geographical Clustering
   \begin{itemize}
     \item Takes into account two variables 
-    \item Essentially where one variables is unusually high, given the value of the other variable which is assumed to have a positively correlated distribution of values 
+    \item Essentially where one variables is unusually high, given the value of the other variable which is assumed to have a positively correlated distribution of values
+    \item \href{http://web.archive.org/web/20040316070705/http://www.ccg.leeds.ac.uk/smart/gam/gam3.html}{"The simplest way of defining a cluster is as a localised excess incidence rate that is unusual in that there is more of some variable than might be expected. Examples would include: a local excess disease rate, a crime hot spot, a unemployment black spot, unusually high positive residuals from a model, the distribution of a plant or surging glaciers or earthquake epicentres, pattern of fraud etc. [...] Pattern detection via the identification of clusters is a very simple and generic form of geographical analysis that has many applications in many different contexts..."}
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -145,7 +146,14 @@ Independent Researcher\\
   \item Space-time attribute pattern analysers
   \begin{itemize}
     \item Pioneered and developed by \href{http://www.ccg.leeds.ac.uk/people/s.openshaw/}{Stan Openshaw} and colleagues
-    \item There are perhaps too many different kinds to summarise in a 20 minute presentation!
+    \item There are perhaps too many different spatial statistical method implementations to summarise in a 20 minute presentation
+    \begin{itemize}
+      \item Spatial patterns for a single temporal period, single attribute (univariate)
+      \item Spatial patterns for a single temporal period, rate type attribute (bivariate)
+      \item Spatial patterns for multiple temporal periods, single attribute (univariate)
+      \item Spatial patterns for multiple temporal periods, rate type attribute (bivariate)
+      \item Spatial patterns for multiple temporal periods, multiple attributes
+    \end{itemize}
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -155,7 +163,7 @@ Independent Researcher\\
 \begin{itemize}
   \item GAM
   \begin{itemize}
-    \item The first Geographical Analysis Machine (GAM) was an early attempt to automate the search for geographical clusters (developed in the late 1980s)
+    \item The first (Mark 1) Geographical Analysis Machine (GAM) was an early attempt to automate the search for geographical clusters (developed in the late 1980s)
     \item Generalised data of incidence and exposure (population at risk) across a range of scales (for overlapping circular sub-regions of different sizes) at a high resolution across the entire region
     \item Applied to find clusters of cancer
     \item Produced exciting and interesting results
@@ -234,8 +242,14 @@ Independent Researcher\\
 \begin{frame}[t]
 \frametitle{Motivation I}
 \begin{itemize}
-  \item Earlier this year the Committee on Medical Aspects of Radiation in the Environment (\href{http://www.comare.org.uk/}{COMARE}) released it's fourteenth report \href{http://www.comare.org.uk/press_releases/documents/COMARE14report.pdf}{\textit{Further consideration of the incidence of childhood leukaemia around nuclear power plants in Great Britain}} which reported that there was no evidence of childhood cancer clusters around British nuclear power plants.
-  \item Does anyone believe this?
+  \item Earlier this year the Committee on Medical Aspects of Radiation in the Environment (\href{http://www.comare.org.uk/}{COMARE}) released it's fourteenth report
+  \begin{itemize}
+    \item \href{http://www.comare.org.uk/press_releases/documents/COMARE14report.pdf}{\textit{Further consideration of the incidence of childhood leukaemia around nuclear power plants in Great Britain}}
+    \item Which reported that there was no evidence of childhood cancer clusters around British nuclear power plants.
+    \begin{itemize}
+      \item Does anyone believe this?
+    \end{itemize}
+  \end{itemize}
 \end{itemize}
 \end{frame}
 
