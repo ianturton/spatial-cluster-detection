@@ -10,5 +10,6 @@ If you are thinking but I have a heatmap plugin that already works you need to c
 
 ![Why Heatmaps are bad!](http://imgs.xkcd.com/comics/heatmap.png)
 
+And if you feel then need for something more authorative than XKCD see what the [CartoNerd](http://cartonerd.blogspot.co.uk/) has to say about [heat maps](http://cartonerd.blogspot.co.uk/2015/02/when-is-heat-map-not-heat-map.html). Hint he's against.
 
-
+  
